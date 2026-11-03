@@ -1,0 +1,30 @@
+/* Pengaturan Kustom untuk Aplikasi TATAP */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.snap-y-mandatory {
+  scroll-snap-type: y mandatory;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 5s linear infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.6)); }
+  50% { transform: scale(1.08); opacity: 0.8; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.9)); }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite ease-in-out;
+}
