@@ -1,0 +1,19 @@
+# Mengabaikan file sistem operasi
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Mengabaikan file konfigurasi editor/IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Mengabaikan file log atau cache npm/build lokal (jika nanti dikembangkan dengan Node.js)
+node_modules/
+dist/
+build/
+.env
