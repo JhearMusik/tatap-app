@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TATAP - Platform Video Pendek</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,7 +13,7 @@
   <!-- Link CSS Eksternal -->
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
+<body class="bg-black text-white font-sans antialiased overflow-hidden flex justify-center items-center">
 
   <!-- Splash Screen / Intro Grafis (Muncul 2 detik pertama) -->
   <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
@@ -31,22 +31,22 @@
     </div>
   </div>
 
-  <!-- Mobile App Frame Container -->
-  <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
+  <!-- Mobile App Frame Container (Full Screen di HP, Frame di Laptop) -->
+  <div class="relative w-full h-full md:max-w-md md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border-0 md:border border-slate-800 flex flex-col">
 
     <!-- Top Navigation Header -->
-    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
+    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent">
       <div class="flex items-center space-x-2">
-        <span class="font-extrabold text-xl tracking-wider text-amber-400">TATAP</span>
+        <span class="font-extrabold text-lg tracking-wider text-amber-400">TATAP</span>
       </div>
-      <div class="flex items-center space-x-3 text-sm font-semibold">
+      <div class="flex items-center space-x-2 text-xs font-semibold">
         <button class="text-slate-400 hover:text-white transition">Mengikuti</button>
         <span class="text-slate-600">|</span>
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
-      <div class="flex items-center space-x-2">
-        <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
-        <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
+      <div class="flex items-center space-x-1.5">
+        <button onclick="openAuthModal('login')" class="text-[11px] bg-amber-400 text-black font-bold px-2.5 py-1 rounded-full hover:bg-amber-300 transition">Masuk</button>
+        <button onclick="openAuthModal('register')" class="text-[11px] bg-slate-800 text-amber-400 border border-amber-400 font-bold px-2.5 py-1 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
     </header>
 
@@ -133,25 +133,25 @@
     </div>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="relative z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
+    <nav class="absolute bottom-0 left-0 right-0 z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
       <button onclick="switchTab('feed')" id="nav-btn-feed" class="flex flex-col items-center text-amber-400 font-medium">
-        <i data-lucide="home" class="w-6 h-6"></i>
-        <span class="mt-1">Beranda</span>
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="mt-0.5 text-[10px]">Beranda</span>
       </button>
       <button onclick="switchTab('explore')" id="nav-btn-explore" class="flex flex-col items-center text-slate-400 hover:text-white transition">
-        <i data-lucide="compass" class="w-6 h-6"></i>
-        <span class="mt-1">Temukan</span>
+        <i data-lucide="compass" class="w-5 h-5"></i>
+        <span class="mt-0.5 text-[10px]">Temukan</span>
       </button>
-      <button onclick="openUploadModal()" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
-        <i data-lucide="plus" class="w-5 h-5"></i>
+      <button onclick="openUploadModal()" class="flex items-center justify-center w-10 h-6 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
+        <i data-lucide="plus" class="w-4 h-4"></i>
       </button>
       <button onclick="switchTab('inbox')" id="nav-btn-inbox" class="flex flex-col items-center text-slate-400 hover:text-white transition">
-        <i data-lucide="message-square" class="w-6 h-6"></i>
-        <span class="mt-1">Kotak Masuk</span>
+        <i data-lucide="message-square" class="w-5 h-5"></i>
+        <span class="mt-0.5 text-[10px]">Kotak Masuk</span>
       </button>
       <button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-slate-400 hover:text-white transition">
-        <i data-lucide="user" class="w-6 h-6"></i>
-        <span class="mt-1">Profil</span>
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="mt-0.5 text-[10px]">Profil</span>
       </button>
     </nav>
 
@@ -162,11 +162,7 @@
           <h3 id="comment-title" class="font-bold text-sm text-amber-400">Komentar</h3>
           <button onclick="closeCommentModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <!-- List Komentar -->
-        <div id="comment-list" class="flex-1 overflow-y-auto py-3 space-y-3 text-xs">
-          <!-- Item komentar diisi via JS -->
-        </div>
-        <!-- Input Komentar Baru -->
+        <div id="comment-list" class="flex-1 overflow-y-auto py-3 space-y-3 text-xs"></div>
         <form onsubmit="handleAddComment(event)" class="pt-2 border-t border-slate-800 flex gap-2">
           <input type="text" id="comment-input" placeholder="Tulis komentar..." required class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
           <button type="submit" class="bg-amber-400 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg-amber-300">Kirim</button>
