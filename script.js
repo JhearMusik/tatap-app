@@ -103,7 +103,7 @@ function renderFeed() {
     item.innerHTML = `
       <video class="w-full h-full object-cover cursor-pointer" loop playsinline src="${video.video_url}"></video>
       
-      <div class="absolute bottom-4 left-4 right-16 z-20 space-y-2 pointer-events-none">
+      <div class="absolute bottom-14 left-4 right-16 z-20 space-y-2 pointer-events-none">
         <h4 class="font-bold text-base drop-shadow">${video.username}</h4>
         <p class="text-xs text-slate-200 line-clamp-2 drop-shadow">${video.caption}</p>
         <div class="flex items-center space-x-2 text-xs text-slate-300">
@@ -112,7 +112,7 @@ function renderFeed() {
         </div>
       </div>
 
-      <div class="absolute right-3 bottom-8 z-20 flex flex-col items-center space-y-5">
+      <div class="absolute right-3 bottom-16 z-20 flex flex-col items-center space-y-5">
         <button onclick="toggleLike(this)" class="flex flex-col items-center text-white hover:scale-110 transition">
           <i data-lucide="heart" class="w-7 h-7"></i>
           <span class="text-xs mt-1 font-semibold">${video.likes_count}</span>
@@ -185,12 +185,11 @@ function handleAddComment(e) {
       username: currentUser.username,
       text: text
     });
-    // Update counter di UI
     const counters = document.querySelectorAll(`.comment-count-${activeVideoId}`);
     counters.forEach(cnt => cnt.innerText = video.comments.length);
 
     input.value = '';
-    openCommentModal(activeVideoId); // Refresh list komentar
+    openCommentModal(activeVideoId);
   }
 }
 
