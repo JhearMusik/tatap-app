@@ -20,9 +20,30 @@
       to { transform: rotate(360deg); }
     }
     .animate-spin-slow { animation: spin-slow 5s linear infinite; }
+    @keyframes pulse-glow {
+      0%, 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.6)); }
+      50% { transform: scale(1.08); opacity: 0.8; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.9)); }
+    }
+    .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
   </style>
 </head>
 <body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
+
+  <!-- Splash Screen / Intro Grafis (Muncul 2 detik pertama) -->
+  <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
+    <div class="relative flex flex-col items-center space-y-6">
+      <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-2xl animate-pulse-glow">
+        <i data-lucide="play" class="w-12 h-12 text-black fill-black ml-1"></i>
+      </div>
+      <div class="text-center space-y-2">
+        <h1 class="text-3xl font-black tracking-widest text-amber-400">TATAP</h1>
+        <p class="text-xs text-slate-400 tracking-wider">Jelajahi Dunia Lewat Video Pendek</p>
+      </div>
+      <div class="w-32 h-1 bg-slate-800 rounded-full overflow-hidden mt-4">
+        <div class="w-full h-full bg-amber-400 origin-left animate-[pulse_1s_infinite]"></div>
+      </div>
+    </div>
+  </div>
 
   <!-- Mobile App Frame Container -->
   <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
@@ -38,7 +59,7 @@
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
       <div class="flex items-center space-x-2">
-        <!-- Tombol Utama Masuk & Daftar -->
+        <!-- Tombol Masuk & Daftar di Header -->
         <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
         <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
@@ -46,7 +67,7 @@
 
     <!-- Main Scrollable Video Feed -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Video items akan dimuat via JS -->
+      <!-- Video items dimuat via JS -->
     </main>
 
     <!-- Bottom Navigation Bar -->
@@ -86,7 +107,7 @@
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Daftar</button>
         </div>
 
-        <!-- Tombol Login Cepat (Sosial Media & No HP) -->
+        <!-- Tombol Login Sosial Media & No HP -->
         <div class="space-y-2 pt-1">
           <button onclick="alert('Fitur login No. HP segera aktif!')" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
             <i data-lucide="phone" class="w-4 h-4 text-amber-400"></i> Lanjutkan dengan No. HP
@@ -98,7 +119,7 @@
 
         <div class="flex items-center my-2">
           <div class="flex-1 border-t border-slate-700"></div>
-          <span class="px-3 text-[10px] text-slate-400 uppercase text-slate-400">Atau Email</span>
+          <span class="px-3 text-[10px] text-slate-400 uppercase">Atau Email</span>
           <div class="flex-1 border-t border-slate-700"></div>
         </div>
 
@@ -153,6 +174,15 @@
     let currentUser = null;
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Hilangkan Splash Screen secara mulus setelah 2 detik
+      setTimeout(() => {
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.remove(), 700);
+        }
+      }, 2000);
+
       try { if (window.lucide) lucide.createIcons(); } catch (e) {}
       renderFeed();
     });
