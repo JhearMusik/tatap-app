@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TATAP - Platform Video Pendek</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Link CSS Eksternal -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
 
-  <!-- Splash Screen -->
+  <!-- Splash Screen / Intro Grafis (Muncul 2 detik pertama) -->
   <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
     <div class="relative flex flex-col items-center space-y-6">
       <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-2xl animate-pulse-glow">
@@ -27,10 +31,10 @@
     </div>
   </div>
 
-  <!-- Frame Utama Mobile -->
+  <!-- Mobile App Frame Container -->
   <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
 
-    <!-- Header Navigation -->
+    <!-- Top Navigation Header -->
     <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
       <div class="flex items-center space-x-2">
         <span class="font-extrabold text-xl tracking-wider text-amber-400">TATAP</span>
@@ -40,18 +44,76 @@
         <span class="text-slate-600">|</span>
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
-      <div id="header-auth-buttons" class="flex items-center space-x-2">
+      <div class="flex items-center space-x-2">
         <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
         <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
     </header>
 
-    <!-- Main Scrollable Feed / Tab Content -->
+    <!-- Main Feed / Beranda -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Feed video dimuat via JS -->
+      <!-- Video items dimuat via script.js -->
     </main>
 
-    <!-- Container Halaman Profil -->
+    <!-- Halaman Temukan (Explore) -->
+    <div id="explore-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20 space-y-4">
+      <div class="relative">
+        <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+        <input type="text" placeholder="Cari video, tag, atau kreator..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-amber-400 mb-2">🔥 Topik Hangat</h4>
+        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#TATAP</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#KulinerBuol</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Viral</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Shorts</span>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold text-slate-300 mb-2">Video Populer</h4>
+        <div class="grid grid-cols-2 gap-2" id="explore-grid"></div>
+      </div>
+    </div>
+
+    <!-- Halaman Kotak Masuk (Inbox) -->
+    <div id="inbox-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20 space-y-3">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h3 class="font-bold text-base text-amber-400">Kotak Masuk</h3>
+        <span class="text-[10px] bg-amber-400 text-black px-2 py-0.5 rounded-full font-bold">3 Baru</span>
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
+          <div class="w-9 h-9 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+            <i data-lucide="heart" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1 text-xs">
+            <p><strong class="text-white">@nature_vibes</strong> menyukai video Anda.</p>
+            <span class="text-[10px] text-slate-500">2 jam yang lalu</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
+          <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
+            <i data-lucide="message-circle" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1 text-xs">
+            <p><strong class="text-white">@kreator_buol</strong> mengomentari: "Keren videonya!"</p>
+            <span class="text-[10px] text-slate-500">5 jam yang lalu</span>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
+          <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+            <i data-lucide="user-plus" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1 text-xs">
+            <p><strong class="text-white">@tatap_official</strong> mulai mengikuti Anda.</p>
+            <span class="text-[10px] text-slate-500">1 hari yang lalu</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Halaman Profil Pengguna -->
     <div id="profile-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20">
       <div class="flex flex-col items-center space-y-3 text-center">
         <div class="w-20 h-20 rounded-full bg-amber-400 text-black flex items-center justify-center font-bold text-2xl border-2 border-amber-300">
@@ -72,25 +134,22 @@
 
     <!-- Bottom Navigation Bar -->
     <nav class="relative z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
-      <button onclick="switchTab('feed')" class="flex flex-col items-center text-amber-400 font-medium">
+      <button onclick="switchTab('feed')" id="nav-btn-feed" class="flex flex-col items-center text-amber-400 font-medium">
         <i data-lucide="home" class="w-6 h-6"></i>
         <span class="mt-1">Beranda</span>
       </button>
-      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button onclick="switchTab('explore')" id="nav-btn-explore" class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="compass" class="w-6 h-6"></i>
         <span class="mt-1">Temukan</span>
       </button>
-
-      <!-- Tombol Plus Posting -->
-      <button onclick="openUploadModal()" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition" title="Buat Postingan">
+      <button onclick="openUploadModal()" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
         <i data-lucide="plus" class="w-5 h-5"></i>
       </button>
-
-      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button onclick="switchTab('inbox')" id="nav-btn-inbox" class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="message-square" class="w-6 h-6"></i>
         <span class="mt-1">Kotak Masuk</span>
       </button>
-      <button onclick="switchTab('profile')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button onclick="switchTab('profile')" id="nav-btn-profile" class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="user" class="w-6 h-6"></i>
         <span class="mt-1">Profil</span>
       </button>
@@ -146,7 +205,7 @@
       </div>
     </div>
 
-    <!-- Modal Buat Postingan Video (Tombol +) -->
+    <!-- Modal Upload Video -->
     <div id="modal-upload" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
@@ -221,6 +280,7 @@
 
   </div>
 
+  <!-- Link Script JS Eksternal -->
   <script src="script.js"></script>
 </body>
 </html>
