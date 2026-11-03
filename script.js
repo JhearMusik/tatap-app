@@ -2,12 +2,16 @@
 let MOCK_VIDEOS = [
   {
     id: '1',
-    username: '@tatap_official',
-    caption: 'Selamat datang di TATAP! Platform video pendek modern. 🚀 #TATAP',
-    music: 'Musik Asli - TATAP Studio',
+    username: '@kreator_tatap',
+    caption: 'Video Paleleh dari Ketinggian 🚁 #Buol #Paleleh',
+    music: 'Musik Hits - TATAP Studio',
     video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     likes_count: 1240,
-    comments_count: 89
+    comments_count: 89,
+    comments: [
+      { username: '@budi_santoso', text: 'Keren banget pemandangannya!' },
+      { username: '@siti_aminah', text: 'Mantap daerah Paleleh.' }
+    ]
   },
   {
     id: '2',
@@ -16,7 +20,10 @@ let MOCK_VIDEOS = [
     music: 'Acoustic Relaxing - Studio sound',
     video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
     likes_count: 852,
-    comments_count: 34
+    comments_count: 34,
+    comments: [
+      { username: '@rizki_99', text: 'Damai banget lihatnya.' }
+    ]
   }
 ];
 
@@ -29,6 +36,8 @@ let currentUser = {
   hobby: 'Traveling & Videografi',
   status: 'Selalu melihat hal positif ✨'
 };
+
+let activeVideoId = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Splash screen durasi 2 detik
@@ -57,7 +66,6 @@ function switchTab(tab) {
   inbox.classList.add('hidden');
   profile.classList.add('hidden');
 
-  // Reset warna ikon navigasi
   ['feed', 'explore', 'inbox', 'profile'].forEach(t => {
     const btn = document.getElementById(`nav-btn-${t}`);
     if (btn) {
@@ -65,7 +73,6 @@ function switchTab(tab) {
     }
   });
 
-  // Tampilkan tab aktif
   if (tab === 'explore') {
     explore.classList.remove('hidden');
     renderExploreGrid();
@@ -110,11 +117,11 @@ function renderFeed() {
           <i data-lucide="heart" class="w-7 h-7"></i>
           <span class="text-xs mt-1 font-semibold">${video.likes_count}</span>
         </button>
-        <button onclick="openAuthModal('login')" class="flex flex-col items-center text-white hover:scale-110 transition">
+        <button onclick="openCommentModal('${video.id}')" class="flex flex-col items-center text-white hover:scale-110 transition">
           <i data-lucide="message-circle" class="w-7 h-7"></i>
-          <span class="text-xs mt-1 font-semibold">${video.comments_count}</span>
+          <span class="text-xs mt-1 font-semibold comment-count-${video.id}">${video.comments.length}</span>
         </button>
-        <button class="flex flex-col items-center text-white hover:scale-110 transition">
+        <button onclick="openShareModal('${video.id}')" class="flex flex-col items-center text-white hover:scale-110 transition">
           <i data-lucide="share-2" class="w-7 h-7"></i>
           <span class="text-xs mt-1 font-semibold">Bagi</span>
         </button>
@@ -127,6 +134,91 @@ function renderFeed() {
   });
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
+// Fungsi Modal Komentar
+function openCommentModal(videoId) {
+  activeVideoId = videoId;
+  const video = MOCK_VIDEOS.find(v => v.id === videoId);
+  if (!video) return;
+
+  const listContainer = document.getElementById('comment-list');
+  listContainer.innerHTML = '';
+
+  if (video.comments.length === 0) {
+    listContainer.innerHTML = '<p class="text-center text-slate-500 py-4">Belum ada komentar. Jadilah yang pertama!</p>';
+  } else {
+    video.comments.forEach(c => {
+      const div = document.createElement('div');
+      div.className = 'flex items-start space-x-2 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800';
+      div.innerHTML = `
+        <div class="w-7 h-7 rounded-full bg-amber-400 text-black font-bold flex items-center justify-center shrink-0 text-xs">
+          ${c.username.charAt(1).toUpperCase()}
+        </div>
+        <div class="flex-1">
+          <strong class="text-amber-400 block text-[11px]">${c.username}</strong>
+          <p class="text-slate-200 text-xs mt-0.5">${c.text}</p>
+        </div>
+      `;
+      listContainer.appendChild(div);
+    });
+  }
+
+  document.getElementById('modal-comments').classList.remove('hidden');
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
+function closeCommentModal() {
+  document.getElementById('modal-comments').classList.add('hidden');
+  activeVideoId = null;
+}
+
+function handleAddComment(e) {
+  e.preventDefault();
+  const input = document.getElementById('comment-input');
+  const text = input.value.trim();
+  if (!text || !activeVideoId) return;
+
+  const video = MOCK_VIDEOS.find(v => v.id === activeVideoId);
+  if (video) {
+    video.comments.push({
+      username: currentUser.username,
+      text: text
+    });
+    // Update counter di UI
+    const counters = document.querySelectorAll(`.comment-count-${activeVideoId}`);
+    counters.forEach(cnt => cnt.innerText = video.comments.length);
+
+    input.value = '';
+    openCommentModal(activeVideoId); // Refresh list komentar
+  }
+}
+
+// Fungsi Modal Share
+function openShareModal(videoId) {
+  activeVideoId = videoId;
+  document.getElementById('modal-share').classList.remove('hidden');
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
+function closeShareModal() {
+  document.getElementById('modal-share').classList.add('hidden');
+  activeVideoId = null;
+}
+
+function shareToSocial(platform) {
+  alert(`Berhasil membagikan tautan video ke ${platform}!`);
+  closeShareModal();
+}
+
+function copyVideoLink() {
+  const dummyLink = window.location.href;
+  navigator.clipboard.writeText(dummyLink).then(() => {
+    alert('Tautan video berhasil disalin ke clipboard!');
+    closeShareModal();
+  }).catch(() => {
+    alert('Gagal menyalin tautan.');
+  });
 }
 
 // Render Grid Temukan (Explore)
@@ -181,7 +273,8 @@ function handleUploadSubmit(e) {
     music: audioType === 'Suara Asli' ? `Suara Asli - ${currentUser.username}` : audioType,
     video_url: videoUrl,
     likes_count: 0,
-    comments_count: 0
+    comments_count: 0,
+    comments: []
   };
 
   MOCK_VIDEOS.unshift(newPost);
