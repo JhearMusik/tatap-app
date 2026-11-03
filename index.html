@@ -10,22 +10,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    .snap-y-mandatory { scroll-snap-type: y mandatory; }
-    .snap-start { scroll-snap-align: start; }
-    @keyframes spin-slow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-    .animate-spin-slow { animation: spin-slow 5s linear infinite; }
-    @keyframes pulse-glow {
-      0%, 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.6)); }
-      50% { transform: scale(1.08); opacity: 0.8; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.9)); }
-    }
-    .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
-  </style>
+  <!-- Link CSS Eksternal -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
 
@@ -59,7 +45,6 @@
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
       <div class="flex items-center space-x-2">
-        <!-- Tombol Masuk & Daftar di Header -->
         <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
         <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
@@ -67,7 +52,7 @@
 
     <!-- Main Scrollable Video Feed -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Video items dimuat via JS -->
+      <!-- Video items dimuat via script.js -->
     </main>
 
     <!-- Bottom Navigation Bar -->
@@ -107,13 +92,13 @@
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Daftar</button>
         </div>
 
-        <!-- Tombol Login Sosial Media & No HP -->
+        <!-- Tombol Login Cepat (Facebook & Twitter/X) -->
         <div class="space-y-2 pt-1">
-          <button onclick="alert('Fitur login No. HP segera aktif!')" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
-            <i data-lucide="phone" class="w-4 h-4 text-amber-400"></i> Lanjutkan dengan No. HP
-          </button>
-          <button onclick="alert('Fitur login Facebook segera aktif!')" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
+          <button onclick="loginWithFacebook()" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
             <i data-lucide="facebook" class="w-4 h-4"></i> Lanjutkan dengan Facebook
+          </button>
+          <button onclick="loginWithTwitter()" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
+            <i data-lucide="twitter" class="w-4 h-4 text-sky-400"></i> Lanjutkan dengan Twitter (X)
           </button>
         </div>
 
@@ -148,147 +133,7 @@
 
   </div>
 
-  <script>
-    const MOCK_VIDEOS = [
-      {
-        id: '1',
-        username: '@tatap_official',
-        caption: 'Selamat datang di TATAP! Platform video pendek modern. 🚀 #TATAP',
-        music: 'Musik Asli - TATAP Studio',
-        video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-        likes_count: 1240,
-        comments_count: 89
-      },
-      {
-        id: '2',
-        username: '@nature_vibes',
-        caption: 'Pemandangan alam yang memukau untuk menemani harimu. 🌿✨ #nature',
-        music: 'Acoustic Relaxing - Studio sound',
-        video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        likes_count: 852,
-        comments_count: 34
-      }
-    ];
-
-    let authMode = 'login';
-    let currentUser = null;
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Hilangkan Splash Screen secara mulus setelah 2 detik
-      setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-          splash.style.opacity = '0';
-          setTimeout(() => splash.remove(), 700);
-        }
-      }, 2000);
-
-      try { if (window.lucide) lucide.createIcons(); } catch (e) {}
-      renderFeed();
-    });
-
-    function renderFeed() {
-      const feed = document.getElementById('video-feed');
-      if (!feed) return;
-      feed.innerHTML = '';
-
-      MOCK_VIDEOS.forEach((video) => {
-        const item = document.createElement('div');
-        item.className = 'snap-start relative w-full h-full flex items-center justify-center bg-black';
-        item.innerHTML = `
-          <video class="w-full h-full object-cover cursor-pointer" loop playsinline src="${video.video_url}"></video>
-          
-          <div class="absolute bottom-4 left-4 right-16 z-20 space-y-2 pointer-events-none">
-            <h4 class="font-bold text-base drop-shadow">${video.username}</h4>
-            <p class="text-xs text-slate-200 line-clamp-2 drop-shadow">${video.caption}</p>
-            <div class="flex items-center space-x-2 text-xs text-slate-300">
-              <i data-lucide="music" class="w-3.5 h-3.5 animate-spin-slow"></i>
-              <span>${video.music}</span>
-            </div>
-          </div>
-
-          <div class="absolute right-3 bottom-8 z-20 flex flex-col items-center space-y-5">
-            <button onclick="toggleLike(this)" class="flex flex-col items-center text-white hover:scale-110 transition">
-              <i data-lucide="heart" class="w-7 h-7"></i>
-              <span class="text-xs mt-1 font-semibold">${video.likes_count}</span>
-            </button>
-            <button onclick="openAuthModal('login')" class="flex flex-col items-center text-white hover:scale-110 transition">
-              <i data-lucide="message-circle" class="w-7 h-7"></i>
-              <span class="text-xs mt-1 font-semibold">${video.comments_count}</span>
-            </button>
-            <button class="flex flex-col items-center text-white hover:scale-110 transition">
-              <i data-lucide="share-2" class="w-7 h-7"></i>
-              <span class="text-xs mt-1 font-semibold">Bagi</span>
-            </button>
-          </div>
-        `;
-
-        const v = item.querySelector('video');
-        v.addEventListener('click', () => { if (v.paused) v.play(); else v.pause(); });
-        feed.appendChild(item);
-      });
-
-      try { if (window.lucide) lucide.createIcons(); } catch (e) {}
-    }
-
-    function openAuthModal(mode = 'login') {
-      setAuthMode(mode);
-      document.getElementById('modal-auth').classList.remove('hidden');
-    }
-
-    function closeAuthModal() {
-      document.getElementById('modal-auth').classList.add('hidden');
-    }
-
-    function setAuthMode(mode) {
-      authMode = mode;
-      const title = document.getElementById('auth-title');
-      const btnSubmit = document.getElementById('btn-auth-submit');
-      const groupUsername = document.getElementById('group-username');
-      const tabLogin = document.getElementById('tab-login');
-      const tabRegister = document.getElementById('tab-register');
-
-      if (mode === 'login') {
-        title.innerText = 'Masuk ke TATAP';
-        btnSubmit.innerText = 'Masuk';
-        groupUsername.classList.add('hidden');
-        tabLogin.className = 'flex-1 py-2 rounded-lg bg-amber-400 text-black transition';
-        tabRegister.className = 'flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition';
-      } else {
-        title.innerText = 'Daftar Akun TATAP';
-        btnSubmit.innerText = 'Daftar';
-        groupUsername.classList.remove('hidden');
-        tabRegister.className = 'flex-1 py-2 rounded-lg bg-amber-400 text-black transition';
-        tabLogin.className = 'flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition';
-      }
-    }
-
-    function handleAuthSubmit(e) {
-      e.preventDefault();
-      const email = document.getElementById('auth-email').value;
-      currentUser = { email, username: authMode === 'register' ? document.getElementById('auth-username').value : '@pengguna_tatap' };
-      closeAuthModal();
-      alert('Berhasil masuk ke aplikasi TATAP!');
-    }
-
-    function loginAsDemo() {
-      currentUser = { username: '@tamu_tatap' };
-      closeAuthModal();
-    }
-
-    function toggleLike(btn) {
-      const countSpan = btn.querySelector('span');
-      let count = parseInt(countSpan.innerText);
-      if (btn.classList.contains('text-red-500')) {
-        btn.classList.remove('text-red-500');
-        btn.classList.add('text-white');
-        countSpan.innerText = count - 1;
-      } else {
-        btn.classList.remove('text-white');
-        btn.classList.add('text-red-500');
-        countSpan.innerText = count + 1;
-      }
-    }
-  </script>
+  <!-- Link Script JS Eksternal -->
+  <script src="script.js"></script>
 </body>
 </html>
