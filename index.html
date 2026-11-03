@@ -155,6 +155,53 @@
       </button>
     </nav>
 
+    <!-- Modal Komentar Interaktif -->
+    <div id="modal-comments" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
+      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 w-full h-[60vh] flex flex-col shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 id="comment-title" class="font-bold text-sm text-amber-400">Komentar</h3>
+          <button onclick="closeCommentModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <!-- List Komentar -->
+        <div id="comment-list" class="flex-1 overflow-y-auto py-3 space-y-3 text-xs">
+          <!-- Item komentar diisi via JS -->
+        </div>
+        <!-- Input Komentar Baru -->
+        <form onsubmit="handleAddComment(event)" class="pt-2 border-t border-slate-800 flex gap-2">
+          <input type="text" id="comment-input" placeholder="Tulis komentar..." required class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+          <button type="submit" class="bg-amber-400 text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg-amber-300">Kirim</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Share / Bagikan -->
+    <div id="modal-share" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
+      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-sm text-amber-400">Bagikan Video</h3>
+          <button onclick="closeShareModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="grid grid-cols-4 gap-4 text-center text-xs text-slate-300 py-2">
+          <button onclick="shareToSocial('WhatsApp')" class="flex flex-col items-center gap-1 hover:text-white">
+            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white"><i data-lucide="message-circle" class="w-6 h-6"></i></div>
+            WhatsApp
+          </button>
+          <button onclick="shareToSocial('Facebook')" class="flex flex-col items-center gap-1 hover:text-white">
+            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white"><i data-lucide="facebook" class="w-6 h-6"></i></div>
+            Facebook
+          </button>
+          <button onclick="shareToSocial('Twitter')" class="flex flex-col items-center gap-1 hover:text-white">
+            <div class="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white"><i data-lucide="twitter" class="w-6 h-6"></i></div>
+            Twitter
+          </button>
+          <button onclick="copyVideoLink()" class="flex flex-col items-center gap-1 hover:text-white">
+            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white"><i data-lucide="link" class="w-6 h-6"></i></div>
+            Salin Link
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal Autentikasi -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
