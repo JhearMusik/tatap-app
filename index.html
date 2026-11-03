@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TATAP - Platform Video Pendek</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* Custom Scrollbar Hiding for Video Feed */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .snap-y-mandatory {
+      scroll-snap-type: y mandatory;
+    }
+    .snap-start {
+      scroll-snap-align: start;
+    }
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 5s linear infinite;
+    }
+  </style>
+</head>
+<body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
+
+  <!-- Mobile App Frame Container -->
+  <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/80 to-transparent">
+      <div class="flex items-center space-x-2">
+        <span class="font-extrabold text-xl tracking-wider text-amber-400">TATAP</span>
+      </div>
+      <div class="flex items-center space-x-4 text-sm font-semibold">
+        <button id="tab-following" class="text-slate-400 hover:text-white transition">Mengikuti</button>
+        <span class="text-slate-600">|</span>
+        <button id="tab-foryou" class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
+      </div>
+      <button id="btn-supabase-config" class="text-slate-300 hover:text-amber-400 transition" title="Pengaturan Supabase">
+        <i data-lucide="settings" class="w-5 h-5"></i>
+      </button>
+    </header>
+
+    <!-- Main Scrollable Video Feed -->
+    <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
+      <!-- Video Items will be injected dynamically via JS -->
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="relative z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
+      <button class="flex flex-col items-center text-amber-400 font-medium">
+        <i data-lucide="home" class="w-6 h-6"></i>
+        <span class="mt-1">Beranda</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
+        <i data-lucide="compass" class="w-6 h-6"></i>
+        <span class="mt-1">Temukan</span>
+      </button>
+      
+      <!-- Upload Button -->
+      <button id="btn-upload" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
+        <i data-lucide="plus" class="w-5 h-5"></i>
+      </button>
+
+      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
+        <i data-lucide="message-square" class="w-6 h-6"></i>
+        <span class="mt-1">Kotak Masuk</span>
+      </button>
+      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
+        <i data-lucide="user" class="w-6 h-6"></i>
+        <span class="mt-1">Profil</span>
+      </button>
+    </nav>
+
+    <!-- Drawer Komentar -->
+    <div id="comment-drawer" class="absolute inset-x-0 bottom-0 z-40 bg-slate-900/95 backdrop-blur-lg rounded-t-2xl transform translate-y-full transition-transform duration-300 ease-out border-t border-slate-700 max-h-[65%] flex flex-col">
+      <div class="flex justify-between items-center px-4 py-3 border-b border-slate-800">
+        <span id="comment-count-header" class="text-xs font-semibold text-slate-300">0 Komentar</span>
+        <button id="btn-close-comments" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div id="comments-list" class="flex-1 overflow-y-auto p-4 space-y-4">
+        <!-- List komentar -->
+      </div>
+      <form id="form-add-comment" class="p-3 border-t border-slate-800 flex items-center gap-2">
+        <input type="text" id="input-comment" placeholder="Tambah komentar..." class="flex-1 bg-slate-800 border border-slate-700 rounded-full px-4 py-2 text-sm text-white focus:outline-none focus:border-amber-400" required />
+        <button type="submit" class="bg-amber-400 text-black font-semibold px-4 py-2 rounded-full text-sm hover:bg-amber-300 transition">Kirim</button>
+      </form>
+    </div>
+
+    <!-- Modal Konfigurasi Supabase -->
+    <div id="modal-config" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4">
+        <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
+          <i data-lucide="database" class="w-5 h-5"></i> Konfigurasi Supabase
+        </h3>
+        <p class="text-xs text-slate-400">Masukkan kredensial Supabase Anda untuk menghubungkan database & storage aktif.</p>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase URL</label>
+          <input type="text" id="cfg-url" placeholder="https://xyz.supabase.co" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+        </div>
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase Anon Key</label>
+          <input type="password" id="cfg-key" placeholder="eyJhbGciOi..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button id="btn-save-config" class="flex-1 bg-amber-400 text-black font-semibold py-2 rounded-lg text-xs hover:bg-amber-300 transition">Simpan</button>
+          <button id="btn-close-config" class="px-4 bg-slate-800 text-slate-300 rounded-lg text-xs hover:bg-slate-700 transition">Batal</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Mock Data Fallback jika Supabase belum terhubung
+    const MOCK_VIDEOS = [
+      {
+        id: '1',
+        username: '@tatap_official',
+        caption: 'Selamat datang di TATAP! Aplikasi video pendek modern berbasis Supabase. 🚀 #TATAP #TikTokClone',
+        music: 'Musik Asli - TATAP Studio',
+        video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
+        likes_count: 1240,
+        comments_count: 89
+      },
+      {
+        id: '2',
+        username: '@nature_vibes',
+        caption: 'Pemandangan indah untuk menyegarkan pikiran hari ini. 🌿✨ #nature #chill',
+        music: 'Acoustic Relaxing - Studio sound',
+        video_url: 'https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4',
+        likes_count: 852,
+        comments_count: 34
+      }
+    ];
+
+    let supabase = null;
+    let currentVideoId = null;
+
+    // Inisialisasi Aplikasi
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      initSupabase();
+      renderFeed();
+      setupEvents();
+    });
+
+    function initSupabase() {
+      const url = localStorage.getItem('TATAP_SUPABASE_URL');
+      const key = localStorage.getItem('TATAP_SUPABASE_KEY');
+      if (url && key && window.supabase) {
+        supabase = window.supabase.createClient(url, key);
+      }
+    }
+
+    async function renderFeed() {
+      const feed = document.getElementById('video-feed');
+      feed.innerHTML = '';
+
+      let videos = MOCK_VIDEOS;
+      if (supabase) {
+        try {
+          const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
+          if (!error && data.length > 0) videos = data;
+        } catch (e) {
+          console.warn('Gagal mengambil data dari Supabase, menggunakan Mock Data:', e);
+        }
+      }
+
+      videos.forEach((video, index) => {
+        const item = document.createElement('div');
+        item.className = 'snap-start relative w-full h-full flex items-center justify-center bg-black';
+        item.innerHTML = `
+          <video class="w-full h-full object-cover cursor-pointer" loop playsinline src="${video.video_url}"></video>
+          
+          <!-- Overlay Controls & Metadata -->
+          <div class="absolute bottom-4 left-4 right-16 z-20 space-y-2">
+            <h4 class="font-bold text-base drop-shadow">${video.username}</h4>
+            <p class="text-xs text-slate-200 line-clamp-2 drop-shadow">${video.caption}</p>
+            <div class="flex items-center space-x-2 text-xs text-slate-300">
+              <i data-lucide="music" class="w-3.5 h-3.5 animate-spin-slow"></i>
+              <span>${video.music}</span>
+            </div>
+          </div>
+
+          <!-- Right Sidebar Actions -->
+          <div class="absolute right-3 bottom-8 z-20 flex flex-col items-center space-y-5">
+            <button onclick="toggleLike(this)" class="flex flex-col items-center text-white hover:scale-110 transition">
+              <i data-lucide="heart" class="w-7 h-7"></i>
+              <span class="text-xs mt-1 font-semibold">${video.likes_count}</span>
+            </button>
+            <button onclick="openComments('${video.id}')" class="flex flex-col items-center text-white hover:scale-110 transition">
+              <i data-lucide="message-circle" class="w-7 h-7"></i>
+              <span class="text-xs mt-1 font-semibold">${video.comments_count}</span>
+            </button>
+            <button class="flex flex-col items-center text-white hover:scale-110 transition">
+              <i data-lucide="share-2" class="w-7 h-7"></i>
+              <span class="text-xs mt-1 font-semibold">Bagi</span>
+            </button>
+          </div>
+        `;
+
+        const v = item.querySelector('video');
+        v.addEventListener('click', () => {
+          if (v.paused) v.play(); else v.pause();
+        });
+
+        feed.appendChild(item);
+      });
+
+      lucide.createIcons();
+    }
+
+    function setupEvents() {
+      // Modal Config Handlers
+      document.getElementById('btn-supabase-config').onclick = () => {
+        document.getElementById('cfg-url').value = localStorage.getItem('TATAP_SUPABASE_URL') || '';
+        document.getElementById('cfg-key').value = localStorage.getItem('TATAP_SUPABASE_KEY') || '';
+        document.getElementById('modal-config').classList.remove('hidden');
+      };
+      document.getElementById('btn-close-config').onclick = () => {
+        document.getElementById('modal-config').classList.add('hidden');
+      };
+      document.getElementById('btn-save-config').onclick = () => {
+        const url = document.getElementById('cfg-url').value.trim();
+        const key = document.getElementById('cfg-key').value.trim();
+        localStorage.setItem('TATAP_SUPABASE_URL', url);
+        localStorage.setItem('TATAP_SUPABASE_KEY', key);
+        document.getElementById('modal-config').classList.add('hidden');
+        initSupabase();
+        renderFeed();
+      };
+
+      // Close Comments Drawer
+      document.getElementById('btn-close-comments').onclick = () => {
+        document.getElementById('comment-drawer').classList.add('translate-y-full');
+      };
+    }
+
+    function toggleLike(btn) {
+      const heartIcon = btn.querySelector('i');
+      const countSpan = btn.querySelector('span');
+      let count = parseInt(countSpan.innerText);
+
+      if (btn.classList.contains('text-red-500')) {
+        btn.classList.remove('text-red-500');
+        btn.classList.add('text-white');
+        countSpan.innerText = count - 1;
+      } else {
+        btn.classList.remove('text-white');
+        btn.classList.add('text-red-500');
+        countSpan.innerText = count + 1;
+      }
+    }
+
+    function openComments(videoId) {
+      currentVideoId = videoId;
+      document.getElementById('comment-drawer').classList.remove('translate-y-full');
+    }
+  </script>
+</body>
+</html>
