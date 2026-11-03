@@ -4,18 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TATAP - Platform Video Pendek</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Link CSS Eksternal -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
 
-  <!-- Splash Screen / Intro Grafis (Muncul 2 detik pertama) -->
+  <!-- Splash Screen -->
   <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
     <div class="relative flex flex-col items-center space-y-6">
       <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-2xl animate-pulse-glow">
@@ -31,10 +27,10 @@
     </div>
   </div>
 
-  <!-- Mobile App Frame Container -->
+  <!-- Frame Utama Mobile -->
   <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
 
-    <!-- Top Navigation Header -->
+    <!-- Header Navigation -->
     <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
       <div class="flex items-center space-x-2">
         <span class="font-extrabold text-xl tracking-wider text-amber-400">TATAP</span>
@@ -44,20 +40,39 @@
         <span class="text-slate-600">|</span>
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
-      <div class="flex items-center space-x-2">
+      <div id="header-auth-buttons" class="flex items-center space-x-2">
         <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
         <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
     </header>
 
-    <!-- Main Scrollable Video Feed -->
+    <!-- Main Scrollable Feed / Tab Content -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Video items dimuat via script.js -->
+      <!-- Feed video dimuat via JS -->
     </main>
+
+    <!-- Container Halaman Profil -->
+    <div id="profile-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20">
+      <div class="flex flex-col items-center space-y-3 text-center">
+        <div class="w-20 h-20 rounded-full bg-amber-400 text-black flex items-center justify-center font-bold text-2xl border-2 border-amber-300">
+          <span id="profile-avatar-text">U</span>
+        </div>
+        <h3 id="profile-display-name" class="font-bold text-lg text-white">@pengguna</h3>
+        <p id="profile-display-status" class="text-xs text-amber-400 italic">"Status belum diisi"</p>
+
+        <div class="w-full bg-slate-800 rounded-xl p-4 text-left text-xs space-y-2 border border-slate-700 mt-2">
+          <p><span class="text-slate-400">Umur:</span> <strong id="profile-display-age" class="text-white">-</strong></p>
+          <p><span class="text-slate-400">Pekerjaan:</span> <strong id="profile-display-job" class="text-white">-</strong></p>
+          <p><span class="text-slate-400">Hobi:</span> <strong id="profile-display-hobby" class="text-white">-</strong></p>
+        </div>
+
+        <button onclick="openEditProfileModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-semibold py-2 rounded-xl text-xs transition">Edit Profil</button>
+      </div>
+    </div>
 
     <!-- Bottom Navigation Bar -->
     <nav class="relative z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
-      <button class="flex flex-col items-center text-amber-400 font-medium">
+      <button onclick="switchTab('feed')" class="flex flex-col items-center text-amber-400 font-medium">
         <i data-lucide="home" class="w-6 h-6"></i>
         <span class="mt-1">Beranda</span>
       </button>
@@ -65,20 +80,23 @@
         <i data-lucide="compass" class="w-6 h-6"></i>
         <span class="mt-1">Temukan</span>
       </button>
-      <button onclick="openAuthModal('login')" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
+
+      <!-- Tombol Plus Posting -->
+      <button onclick="openUploadModal()" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition" title="Buat Postingan">
         <i data-lucide="plus" class="w-5 h-5"></i>
       </button>
+
       <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="message-square" class="w-6 h-6"></i>
         <span class="mt-1">Kotak Masuk</span>
       </button>
-      <button onclick="openAuthModal('login')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button onclick="switchTab('profile')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="user" class="w-6 h-6"></i>
         <span class="mt-1">Profil</span>
       </button>
     </nav>
 
-    <!-- Modal Autentikasi (Login & Register) -->
+    <!-- Modal Autentikasi -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
@@ -86,13 +104,11 @@
           <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         
-        <!-- Toggle Login / Register Tabs -->
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
           <button id="tab-login" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Masuk</button>
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Daftar</button>
         </div>
 
-        <!-- Tombol Login Cepat (Facebook & Twitter/X) -->
         <div class="space-y-2 pt-1">
           <button onclick="loginWithFacebook()" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
             <i data-lucide="facebook" class="w-4 h-4"></i> Lanjutkan dengan Facebook
@@ -108,7 +124,6 @@
           <div class="flex-1 border-t border-slate-700"></div>
         </div>
 
-        <!-- Form Email & Password -->
         <form id="form-auth" onsubmit="handleAuthSubmit(event)" class="space-y-3">
           <div id="group-username" class="hidden">
             <label class="block text-xs font-medium text-slate-300 mb-1">Nama Pengguna</label>
@@ -131,9 +146,81 @@
       </div>
     </div>
 
+    <!-- Modal Buat Postingan Video (Tombol +) -->
+    <div id="modal-upload" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-amber-400">Posting Video Baru</h3>
+          <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <form id="form-upload" onsubmit="handleUploadSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">File Video / URL Video</label>
+            <input type="file" id="upload-file" accept="video/*" class="hidden" onchange="previewVideoFile(event)">
+            <button type="button" onclick="document.getElementById('upload-file').click()" class="w-full bg-slate-800 border border-dashed border-slate-600 rounded-lg p-3 text-xs text-slate-300 hover:border-amber-400 text-center">
+              📁 Pilih File Video dari Perangkat
+            </button>
+            <input type="url" id="upload-url" placeholder="Atau tempelkan URL video (http...)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 mt-2">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Caption / Keterangan</label>
+            <textarea id="upload-caption" placeholder="Tulis deskripsi video #tag..." required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 h-20 resize-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan Suara / Audio</label>
+            <select id="upload-audio-type" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+              <option value="Suara Asli">🎙️ Suara Asli Pengguna</option>
+              <option value="Musik Hits - TATAP Studio">🎵 Musik Hits - TATAP Studio</option>
+              <option value="Acoustic Chill Sound">🎵 Acoustic Chill Sound</option>
+            </select>
+          </div>
+
+          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Posting Sekarang</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Edit Profil -->
+    <div id="modal-edit-profile" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-amber-400">Edit Data Diri</h3>
+          <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <form id="form-edit-profile" onsubmit="handleProfileSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Nama Lengkap / Username</label>
+            <input type="text" id="edit-name" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div class="flex gap-2">
+            <div class="w-1/2">
+              <label class="block text-xs font-medium text-slate-300 mb-1">Umur</label>
+              <input type="number" id="edit-age" placeholder="25" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            </div>
+            <div class="w-1/2">
+              <label class="block text-xs font-medium text-slate-300 mb-1">Pekerjaan</label>
+              <input type="text" id="edit-job" placeholder="Kreator" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Hobi</label>
+            <input type="text" id="edit-hobby" placeholder="Membaca, Videografi" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Status</label>
+            <input type="text" id="edit-status" placeholder="Bio / Kata-kata hari ini..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Simpan Perubahan</button>
+        </form>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Link Script JS Eksternal -->
   <script src="script.js"></script>
 </body>
 </html>
