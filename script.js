@@ -1,5 +1,5 @@
-// Data Video Mock / Bawaan
-const MOCK_VIDEOS = [
+// Data Video Utama
+let MOCK_VIDEOS = [
   {
     id: '1',
     username: '@tatap_official',
@@ -21,11 +21,16 @@ const MOCK_VIDEOS = [
 ];
 
 let authMode = 'login';
-let currentUser = null;
+let currentUser = {
+  username: '@kreator_tatap',
+  name: 'Pengguna TATAP',
+  age: 24,
+  job: 'Konten Kreator',
+  hobby: 'Traveling & Videografi',
+  status: 'Selalu melihat hal positif ✨'
+};
 
-// Inisialisasi saat halaman selesai dimuat
 document.addEventListener('DOMContentLoaded', () => {
-  // Hilangkan Splash Screen secara mulus setelah 2 detik
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if (splash) {
@@ -36,9 +41,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
   renderFeed();
+  updateProfileDisplay();
 });
 
-// Fungsi Render Feed Video
+// Switch Tab Beranda / Profil
+function switchTab(tab) {
+  const feed = document.getElementById('video-feed');
+  const profile = document.getElementById('profile-view');
+
+  if (tab === 'profile') {
+    feed.classList.add('hidden');
+    profile.classList.remove('hidden');
+  } else {
+    profile.classList.add('hidden');
+    feed.classList.remove('hidden');
+  }
+}
+
+// Render Feed Video
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -83,7 +103,84 @@ function renderFeed() {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Fungsi Modal Auth
+// Modal Upload (Tombol +)
+function openUploadModal() {
+  document.getElementById('modal-upload').classList.remove('hidden');
+}
+
+function closeUploadModal() {
+  document.getElementById('modal-upload').classList.add('hidden');
+}
+
+function previewVideoFile(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const url = URL.createObjectURL(file);
+    document.getElementById('upload-url').value = url;
+  }
+}
+
+function handleUploadSubmit(e) {
+  e.preventDefault();
+  const caption = document.getElementById('upload-caption').value;
+  const audioType = document.getElementById('upload-audio-type').value;
+  const videoUrl = document.getElementById('upload-url').value || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+
+  const newPost = {
+    id: Date.now().toString(),
+    username: currentUser.username || '@kreator_tatap',
+    caption: caption,
+    music: audioType === 'Suara Asli' ? `Suara Asli - ${currentUser.username}` : audioType,
+    video_url: videoUrl,
+    likes_count: 0,
+    comments_count: 0
+  };
+
+  MOCK_VIDEOS.unshift(newPost);
+  renderFeed();
+  closeUploadModal();
+  switchTab('feed');
+  alert('Postingan video Anda berhasil dipublikasikan!');
+}
+
+// Modal Edit Profil & Data Diri
+function openEditProfileModal() {
+  document.getElementById('edit-name').value = currentUser.name || '';
+  document.getElementById('edit-age').value = currentUser.age || '';
+  document.getElementById('edit-job').value = currentUser.job || '';
+  document.getElementById('edit-hobby').value = currentUser.hobby || '';
+  document.getElementById('edit-status').value = currentUser.status || '';
+  document.getElementById('modal-edit-profile').classList.remove('hidden');
+}
+
+function closeEditProfileModal() {
+  document.getElementById('modal-edit-profile').classList.add('hidden');
+}
+
+function handleProfileSubmit(e) {
+  e.preventDefault();
+  currentUser.name = document.getElementById('edit-name').value;
+  currentUser.username = '@' + currentUser.name.toLowerCase().replace(/\s+/g, '_');
+  currentUser.age = document.getElementById('edit-age').value;
+  currentUser.job = document.getElementById('edit-job').value;
+  currentUser.hobby = document.getElementById('edit-hobby').value;
+  currentUser.status = document.getElementById('edit-status').value;
+
+  updateProfileDisplay();
+  closeEditProfileModal();
+  alert('Data diri berhasil diperbarui!');
+}
+
+function updateProfileDisplay() {
+  document.getElementById('profile-display-name').innerText = currentUser.username;
+  document.getElementById('profile-display-status').innerText = `"${currentUser.status}"`;
+  document.getElementById('profile-display-age').innerText = currentUser.age ? `${currentUser.age} tahun` : '-';
+  document.getElementById('profile-display-job').innerText = currentUser.job || '-';
+  document.getElementById('profile-display-hobby').innerText = currentUser.hobby || '-';
+  document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
+}
+
+// Handler Auth
 function openAuthModal(mode = 'login') {
   setAuthMode(mode);
   document.getElementById('modal-auth').classList.remove('hidden');
@@ -116,31 +213,25 @@ function setAuthMode(mode) {
   }
 }
 
-// Handler Submit Email/Password
 function handleAuthSubmit(e) {
   e.preventDefault();
-  const email = document.getElementById('auth-email').value;
-  currentUser = { email, username: authMode === 'register' ? document.getElementById('auth-username').value : '@pengguna_tatap' };
   closeAuthModal();
   alert('Berhasil masuk ke aplikasi TATAP!');
 }
 
-// Login Sosial Media (Facebook & Twitter/X)
 function loginWithFacebook() {
-  alert('Fitur login dengan Facebook akan segera dihubungkan ke Supabase OAuth!');
+  alert('Fitur login dengan Facebook segera aktif!');
 }
 
 function loginWithTwitter() {
-  alert('Fitur login dengan Twitter (X) akan segera dihubungkan ke Supabase OAuth!');
+  alert('Fitur login dengan Twitter (X) segera aktif!');
 }
 
 function loginAsDemo() {
-  currentUser = { username: '@tamu_tatap' };
   closeAuthModal();
   alert('Masuk menggunakan Mode Demo.');
 }
 
-// Interaksi Like Video
 function toggleLike(btn) {
   const countSpan = btn.querySelector('span');
   let count = parseInt(countSpan.innerText);
