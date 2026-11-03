@@ -20,78 +20,53 @@
       to { transform: rotate(360deg); }
     }
     .animate-spin-slow { animation: spin-slow 5s linear infinite; }
-    @keyframes pulse-glow {
-      0%, 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 15px rgba(251, 191, 36, 0.6)); }
-      50% { transform: scale(1.08); opacity: 0.8; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 0.9)); }
-    }
-    .animate-pulse-glow { animation: pulse-glow 2s infinite ease-in-out; }
   </style>
 </head>
 <body class="bg-black text-white font-sans antialiased h-screen overflow-hidden flex justify-center items-center">
-
-  <!-- Splash Screen / Intro Grafis Keren -->
-  <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700 pointer-events-none">
-    <div class="relative flex flex-col items-center space-y-6">
-      <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-2xl animate-pulse-glow">
-        <i data-lucide="play" class="w-12 h-12 text-black fill-black ml-1"></i>
-      </div>
-      <div class="text-center space-y-2">
-        <h1 class="text-3xl font-black tracking-widest text-amber-400">TATAP</h1>
-        <p class="text-xs text-slate-400 tracking-wider">Jelajahi Dunia Lewat Video Pendek</p>
-      </div>
-      <div class="w-32 h-1 bg-slate-800 rounded-full overflow-hidden mt-4">
-        <div class="w-full h-full bg-amber-400 origin-left animate-[pulse_1s_infinite]"></div>
-      </div>
-    </div>
-  </div>
 
   <!-- Mobile App Frame Container -->
   <div class="relative w-full max-w-md h-full md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col">
 
     <!-- Top Navigation Header -->
-    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/80 to-transparent">
+    <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 bg-gradient-to-b from-black/90 to-transparent">
       <div class="flex items-center space-x-2">
         <span class="font-extrabold text-xl tracking-wider text-amber-400">TATAP</span>
       </div>
-      <div class="flex items-center space-x-4 text-sm font-semibold">
+      <div class="flex items-center space-x-3 text-sm font-semibold">
         <button class="text-slate-400 hover:text-white transition">Mengikuti</button>
         <span class="text-slate-600">|</span>
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
-      <div class="flex items-center space-x-3">
-        <button id="btn-auth-trigger" onclick="openAuthModal()" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
-        <button id="btn-supabase-config" onclick="openConfigModal()" class="text-slate-300 hover:text-amber-400 transition" title="Pengaturan Supabase">
-          <i data-lucide="settings" class="w-5 h-5"></i>
-        </button>
+      <div class="flex items-center space-x-2">
+        <!-- Tombol Utama Masuk & Daftar -->
+        <button onclick="openAuthModal('login')" class="text-xs bg-amber-400 text-black font-bold px-3 py-1.5 rounded-full hover:bg-amber-300 transition">Masuk</button>
+        <button onclick="openAuthModal('register')" class="text-xs bg-slate-800 text-amber-400 border border-amber-400 font-bold px-3 py-1.5 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
     </header>
 
     <!-- Main Scrollable Video Feed -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Video items akan diisi otomatis melalui JS -->
+      <!-- Video items akan dimuat via JS -->
     </main>
 
     <!-- Bottom Navigation Bar -->
     <nav class="relative z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
-      <button onclick="switchNav('home')" class="flex flex-col items-center text-amber-400 font-medium">
+      <button class="flex flex-col items-center text-amber-400 font-medium">
         <i data-lucide="home" class="w-6 h-6"></i>
         <span class="mt-1">Beranda</span>
       </button>
-      <button onclick="switchNav('explore')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="compass" class="w-6 h-6"></i>
         <span class="mt-1">Temukan</span>
       </button>
-      
-      <!-- Upload Button -->
-      <button onclick="openAuthModal()" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
+      <button onclick="openAuthModal('login')" class="flex items-center justify-center w-11 h-7 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
         <i data-lucide="plus" class="w-5 h-5"></i>
       </button>
-
-      <button onclick="switchNav('inbox')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="message-square" class="w-6 h-6"></i>
         <span class="mt-1">Kotak Masuk</span>
       </button>
-      <button onclick="openAuthModal()" class="flex flex-col items-center text-slate-400 hover:text-white transition">
+      <button onclick="openAuthModal('login')" class="flex flex-col items-center text-slate-400 hover:text-white transition">
         <i data-lucide="user" class="w-6 h-6"></i>
         <span class="mt-1">Profil</span>
       </button>
@@ -99,13 +74,13 @@
 
     <!-- Modal Autentikasi (Login & Register) -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
           <h3 id="auth-title" class="text-lg font-bold text-amber-400">Masuk ke TATAP</h3>
           <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         
-        <!-- Toggle Login / Register -->
+        <!-- Toggle Login / Register Tabs -->
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
           <button id="tab-login" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Masuk</button>
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Daftar</button>
@@ -113,17 +88,17 @@
 
         <!-- Tombol Login Cepat (Sosial Media & No HP) -->
         <div class="space-y-2 pt-1">
-          <button onclick="alert('Login dengan Nomor HP akan segera hadir!')" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
+          <button onclick="alert('Fitur login No. HP segera aktif!')" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
             <i data-lucide="phone" class="w-4 h-4 text-amber-400"></i> Lanjutkan dengan No. HP
           </button>
-          <button onclick="alert('Login dengan Facebook akan segera hadir!')" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
+          <button onclick="alert('Fitur login Facebook segera aktif!')" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
             <i data-lucide="facebook" class="w-4 h-4"></i> Lanjutkan dengan Facebook
           </button>
         </div>
 
         <div class="flex items-center my-2">
           <div class="flex-1 border-t border-slate-700"></div>
-          <span class="px-3 text-[10px] text-slate-400 uppercase">Atau dengan Email</span>
+          <span class="px-3 text-[10px] text-slate-400 uppercase text-slate-400">Atau Email</span>
           <div class="flex-1 border-t border-slate-700"></div>
         </div>
 
@@ -150,28 +125,6 @@
       </div>
     </div>
 
-    <!-- Modal Konfigurasi Supabase -->
-    <div id="modal-config" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4">
-        <h3 class="text-lg font-bold text-amber-400 flex items-center gap-2">
-          <i data-lucide="database" class="w-5 h-5"></i> Konfigurasi Supabase
-        </h3>
-        <p class="text-xs text-slate-400">Masukkan kredensial Supabase Anda untuk menghubungkan database & storage aktif.</p>
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase URL</label>
-          <input type="text" id="cfg-url" placeholder="https://xyz.supabase.co" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">Supabase Anon Key</label>
-          <input type="password" id="cfg-key" placeholder="eyJhbGciOi..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-        </div>
-        <div class="flex gap-2 pt-2">
-          <button onclick="saveSupabaseConfig()" class="flex-1 bg-amber-400 text-black font-semibold py-2 rounded-lg text-xs hover:bg-amber-300 transition">Simpan</button>
-          <button onclick="closeConfigModal()" class="px-4 bg-slate-800 text-slate-300 rounded-lg text-xs hover:bg-slate-700 transition">Batal</button>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script>
@@ -179,7 +132,7 @@
       {
         id: '1',
         username: '@tatap_official',
-        caption: 'Selamat datang di TATAP! Platform video pendek modern. 🚀 #TATAP #TikTokClone',
+        caption: 'Selamat datang di TATAP! Platform video pendek modern. 🚀 #TATAP',
         music: 'Musik Asli - TATAP Studio',
         video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
         likes_count: 1240,
@@ -188,7 +141,7 @@
       {
         id: '2',
         username: '@nature_vibes',
-        caption: 'Pemandangan alam yang memukau untuk menemani harimu. 🌿✨ #nature #chill',
+        caption: 'Pemandangan alam yang memukau untuk menemani harimu. 🌿✨ #nature',
         music: 'Acoustic Relaxing - Studio sound',
         video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
         likes_count: 852,
@@ -196,53 +149,20 @@
       }
     ];
 
-    let supabase = null;
     let authMode = 'login';
     let currentUser = null;
 
-    // Menghilangkan Splash Screen secara pasti setelah 2.5 detik
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if (splash) {
-          splash.style.opacity = '0';
-          setTimeout(() => splash.remove(), 700);
-        }
-      }, 2500);
-
+    document.addEventListener('DOMContentLoaded', () => {
       try { if (window.lucide) lucide.createIcons(); } catch (e) {}
-      initSupabase();
       renderFeed();
     });
 
-    function initSupabase() {
-      const url = localStorage.getItem('TATAP_SUPABASE_URL');
-      const key = localStorage.getItem('TATAP_SUPABASE_KEY');
-      if (url && key && window.supabase) {
-        try {
-          supabase = window.supabase.createClient(url, key);
-        } catch (e) {
-          console.warn('Gagal koneksi Supabase:', e);
-        }
-      }
-    }
-
-    async function renderFeed() {
+    function renderFeed() {
       const feed = document.getElementById('video-feed');
       if (!feed) return;
       feed.innerHTML = '';
 
-      let videos = MOCK_VIDEOS;
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.from('videos').select('*').order('created_at', { ascending: false });
-          if (!error && data && data.length > 0) videos = data;
-        } catch (e) {
-          console.warn('Menggunakan data bawaan:', e);
-        }
-      }
-
-      videos.forEach((video) => {
+      MOCK_VIDEOS.forEach((video) => {
         const item = document.createElement('div');
         item.className = 'snap-start relative w-full h-full flex items-center justify-center bg-black';
         item.innerHTML = `
@@ -262,7 +182,7 @@
               <i data-lucide="heart" class="w-7 h-7"></i>
               <span class="text-xs mt-1 font-semibold">${video.likes_count}</span>
             </button>
-            <button onclick="openAuthModal()" class="flex flex-col items-center text-white hover:scale-110 transition">
+            <button onclick="openAuthModal('login')" class="flex flex-col items-center text-white hover:scale-110 transition">
               <i data-lucide="message-circle" class="w-7 h-7"></i>
               <span class="text-xs mt-1 font-semibold">${video.comments_count}</span>
             </button>
@@ -281,30 +201,13 @@
       try { if (window.lucide) lucide.createIcons(); } catch (e) {}
     }
 
-    function openAuthModal() {
+    function openAuthModal(mode = 'login') {
+      setAuthMode(mode);
       document.getElementById('modal-auth').classList.remove('hidden');
     }
 
     function closeAuthModal() {
       document.getElementById('modal-auth').classList.add('hidden');
-    }
-
-    function openConfigModal() {
-      document.getElementById('cfg-url').value = localStorage.getItem('TATAP_SUPABASE_URL') || '';
-      document.getElementById('cfg-key').value = localStorage.getItem('TATAP_SUPABASE_KEY') || '';
-      document.getElementById('modal-config').classList.remove('hidden');
-    }
-
-    function closeConfigModal() {
-      document.getElementById('modal-config').classList.add('hidden');
-    }
-
-    function saveSupabaseConfig() {
-      localStorage.setItem('TATAP_SUPABASE_URL', document.getElementById('cfg-url').value.trim());
-      localStorage.setItem('TATAP_SUPABASE_KEY', document.getElementById('cfg-key').value.trim());
-      closeConfigModal();
-      initSupabase();
-      renderFeed();
     }
 
     function setAuthMode(mode) {
@@ -330,47 +233,17 @@
       }
     }
 
-    async function handleAuthSubmit(e) {
+    function handleAuthSubmit(e) {
       e.preventDefault();
       const email = document.getElementById('auth-email').value;
-      const password = document.getElementById('auth-password').value;
-
-      if (!email || !password) {
-        alert('Harap isi Email dan Kata Sandi!');
-        return;
-      }
-
-      if (supabase) {
-        if (authMode === 'register') {
-          const username = document.getElementById('auth-username').value;
-          const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { username } } });
-          if (error) alert(error.message);
-          else { alert('Pendaftaran berhasil! Silakan masuk.'); setAuthMode('login'); }
-        } else {
-          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-          if (error) alert(error.message);
-          else { currentUser = data.user; updateAuthUI(); closeAuthModal(); }
-        }
-      } else {
-        currentUser = { email, username: authMode === 'register' ? document.getElementById('auth-username').value : '@pengguna_demo' };
-        updateAuthUI();
-        closeAuthModal();
-        alert('Berhasil masuk (Mode Demo)!');
-      }
+      currentUser = { email, username: authMode === 'register' ? document.getElementById('auth-username').value : '@pengguna_tatap' };
+      closeAuthModal();
+      alert('Berhasil masuk ke aplikasi TATAP!');
     }
 
     function loginAsDemo() {
       currentUser = { username: '@tamu_tatap' };
-      updateAuthUI();
       closeAuthModal();
-    }
-
-    function updateAuthUI() {
-      const btnAuth = document.getElementById('btn-auth-trigger');
-      if (currentUser && btnAuth) {
-        btnAuth.innerText = currentUser.username || (currentUser.email ? currentUser.email.split('@')[0] : 'Profil');
-        btnAuth.className = 'text-xs bg-slate-800 border border-amber-400 text-amber-400 font-bold px-3 py-1.5 rounded-full';
-      }
     }
 
     function toggleLike(btn) {
@@ -384,12 +257,6 @@
         btn.classList.remove('text-white');
         btn.classList.add('text-red-500');
         countSpan.innerText = count + 1;
-      }
-    }
-
-    function switchNav(tab) {
-      if (tab === 'profile' && !currentUser) {
-        openAuthModal();
       }
     }
   </script>
