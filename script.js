@@ -31,6 +31,7 @@ let currentUser = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Splash screen durasi 2 detik
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if (splash) {
@@ -44,18 +45,43 @@ document.addEventListener('DOMContentLoaded', () => {
   updateProfileDisplay();
 });
 
-// Switch Tab Beranda / Profil
+// Switch Tab Beranda, Temukan, Kotak Masuk, Profil
 function switchTab(tab) {
   const feed = document.getElementById('video-feed');
+  const explore = document.getElementById('explore-view');
+  const inbox = document.getElementById('inbox-view');
   const profile = document.getElementById('profile-view');
 
-  if (tab === 'profile') {
-    feed.classList.add('hidden');
+  feed.classList.add('hidden');
+  explore.classList.add('hidden');
+  inbox.classList.add('hidden');
+  profile.classList.add('hidden');
+
+  // Reset warna ikon navigasi
+  ['feed', 'explore', 'inbox', 'profile'].forEach(t => {
+    const btn = document.getElementById(`nav-btn-${t}`);
+    if (btn) {
+      btn.className = 'flex flex-col items-center text-slate-400 hover:text-white transition';
+    }
+  });
+
+  // Tampilkan tab aktif
+  if (tab === 'explore') {
+    explore.classList.remove('hidden');
+    renderExploreGrid();
+    document.getElementById('nav-btn-explore').className = 'flex flex-col items-center text-amber-400 font-medium';
+  } else if (tab === 'inbox') {
+    inbox.classList.remove('hidden');
+    document.getElementById('nav-btn-inbox').className = 'flex flex-col items-center text-amber-400 font-medium';
+  } else if (tab === 'profile') {
     profile.classList.remove('hidden');
+    document.getElementById('nav-btn-profile').className = 'flex flex-col items-center text-amber-400 font-medium';
   } else {
-    profile.classList.add('hidden');
     feed.classList.remove('hidden');
+    document.getElementById('nav-btn-feed').className = 'flex flex-col items-center text-amber-400 font-medium';
   }
+
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
 // Render Feed Video
@@ -103,6 +129,28 @@ function renderFeed() {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
+// Render Grid Temukan (Explore)
+function renderExploreGrid() {
+  const grid = document.getElementById('explore-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  MOCK_VIDEOS.forEach((video) => {
+    const card = document.createElement('div');
+    card.className = 'relative bg-slate-800 rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border border-slate-700/50';
+    card.innerHTML = `
+      <video class="w-full h-full object-cover" src="${video.video_url}"></video>
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2 text-xs">
+        <span class="font-bold text-amber-400 truncate">${video.username}</span>
+        <span class="text-[10px] text-slate-300 truncate">${video.caption}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => switchTab('feed'));
+    grid.appendChild(card);
+  });
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
 // Modal Upload (Tombol +)
 function openUploadModal() {
   document.getElementById('modal-upload').classList.remove('hidden');
@@ -143,7 +191,7 @@ function handleUploadSubmit(e) {
   alert('Postingan video Anda berhasil dipublikasikan!');
 }
 
-// Modal Edit Profil & Data Diri
+// Modal Edit Profil
 function openEditProfileModal() {
   document.getElementById('edit-name').value = currentUser.name || '';
   document.getElementById('edit-age').value = currentUser.age || '';
@@ -180,7 +228,7 @@ function updateProfileDisplay() {
   document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
 }
 
-// Handler Auth
+// Modal Auth & Login
 function openAuthModal(mode = 'login') {
   setAuthMode(mode);
   document.getElementById('modal-auth').classList.remove('hidden');
