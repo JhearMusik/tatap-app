@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>TATAP - Platform Video Pendek</title>
+  <title>TATAP - Platform Video Pendek & Live</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
@@ -23,7 +23,7 @@
       </div>
       <div class="text-center space-y-2">
         <h1 class="text-3xl font-black tracking-widest text-amber-400">TATAP</h1>
-        <p class="text-xs text-slate-400 tracking-wider">Jelajahi Dunia Lewat Video Pendek</p>
+        <p class="text-xs text-slate-400 tracking-wider">Jelajahi Dunia Lewat Video Pendek & Live</p>
       </div>
       <div class="w-32 h-1 bg-slate-800 rounded-full overflow-hidden mt-4">
         <div class="w-full h-full bg-amber-400 origin-left animate-[pulse_1s_infinite]"></div>
@@ -31,7 +31,7 @@
     </div>
   </div>
 
-  <!-- Mobile App Frame Container (Full Screen di HP, Frame di Laptop) -->
+  <!-- Mobile App Frame Container -->
   <div class="relative w-full h-full md:max-w-md md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border-0 md:border border-slate-800 flex flex-col">
 
     <!-- Top Navigation Header -->
@@ -67,7 +67,7 @@
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#TATAP</span>
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#KulinerBuol</span>
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Viral</span>
-          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Shorts</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#LiveStreaming</span>
         </div>
       </div>
       <div>
@@ -93,21 +93,12 @@
           </div>
         </div>
         <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
-          <div class="w-9 h-9 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0">
-            <i data-lucide="message-circle" class="w-5 h-5"></i>
+          <div class="w-9 h-9 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
+            <i data-lucide="video" class="w-5 h-5"></i>
           </div>
           <div class="flex-1 text-xs">
-            <p><strong class="text-white">@kreator_buol</strong> mengomentari: "Keren videonya!"</p>
-            <span class="text-[10px] text-slate-500">5 jam yang lalu</span>
-          </div>
-        </div>
-        <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
-          <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
-            <i data-lucide="user-plus" class="w-5 h-5"></i>
-          </div>
-          <div class="flex-1 text-xs">
-            <p><strong class="text-white">@tatap_official</strong> mulai mengikuti Anda.</p>
-            <span class="text-[10px] text-slate-500">1 hari yang lalu</span>
+            <p><strong class="text-white">@kreator_tatap</strong> sedang melakukan Live Streaming!</p>
+            <span class="text-[10px] text-slate-500">Baru saja</span>
           </div>
         </div>
       </div>
@@ -132,6 +123,49 @@
       </div>
     </div>
 
+    <!-- Tampilan Live Streaming Room (Aktif Saat Live) -->
+    <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-4 pt-16 pb-20">
+      <div class="absolute inset-0 z-0">
+        <video id="live-video-stream" class="w-full h-full object-cover" autoplay playsinline muted></video>
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
+      </div>
+
+      <!-- Header Live -->
+      <div class="relative z-10 flex justify-between items-center">
+        <div class="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+          <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+          <span class="text-xs font-bold text-red-400">LIVE</span>
+          <span class="text-[10px] text-slate-300">| 👥 <span id="live-viewer-count">1.2k</span></span>
+        </div>
+        <button onclick="stopLiveStream()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold transition">Akhiri Live</button>
+      </div>
+
+      <!-- Multi-Guest Grid / Video Tamu Diundang -->
+      <div id="live-guest-container" class="relative z-10 grid grid-cols-2 gap-2 my-auto">
+        <!-- Host Utama -->
+        <div class="relative bg-slate-800/50 border border-amber-400/50 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host (@kreator_tatap)</span>
+        </div>
+        <!-- Tamu yang Diundang (Hidden jika belum ada) -->
+        <div id="guest-slot-1" class="hidden relative bg-slate-800/80 border border-slate-600 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
+          <video id="guest-video-element" class="w-full h-full object-cover" autoplay playsinline></video>
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu (Co-host)</span>
+        </div>
+      </div>
+
+      <!-- Footer Live: Kontrol, Komentar & Tombol Hadiah -->
+      <div class="relative z-10 space-y-3">
+        <div class="flex gap-2">
+          <button onclick="inviteGuestToLive()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Undang Tamu
+          </button>
+          <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+            <i data-lucide="gift" class="w-4 h-4"></i> Kirim Hadiah
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Bottom Navigation Bar -->
     <nav class="absolute bottom-0 left-0 right-0 z-30 bg-black/90 backdrop-blur-md border-t border-slate-800 px-4 py-2 flex justify-around items-center text-xs">
       <button onclick="switchTab('feed')" id="nav-btn-feed" class="flex flex-col items-center text-amber-400 font-medium">
@@ -142,7 +176,7 @@
         <i data-lucide="compass" class="w-5 h-5"></i>
         <span class="mt-0.5 text-[10px]">Temukan</span>
       </button>
-      <button onclick="openUploadModal()" class="flex items-center justify-center w-10 h-6 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
+      <button onclick="openCreateMenuModal()" class="flex items-center justify-center w-10 h-6 bg-amber-400 text-black rounded-lg font-bold shadow-lg hover:bg-amber-300 transition">
         <i data-lucide="plus" class="w-4 h-4"></i>
       </button>
       <button onclick="switchTab('inbox')" id="nav-btn-inbox" class="flex flex-col items-center text-slate-400 hover:text-white transition">
@@ -154,6 +188,72 @@
         <span class="mt-0.5 text-[10px]">Profil</span>
       </button>
     </nav>
+
+    <!-- Modal Pilihan Tombol (+) : Upload, Rekam Video, atau Live Streaming -->
+    <div id="modal-create-menu" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-3 shadow-2xl text-center">
+        <div class="flex justify-between items-center mb-2">
+          <h3 class="text-lg font-bold text-amber-400">Buat Konten Baru</h3>
+          <button onclick="closeCreateMenuModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <button onclick="openRecordModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+          <i data-lucide="video" class="w-5 h-5 text-amber-400"></i> Rekam Video Langsung
+        </button>
+        <button onclick="openUploadModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition">
+          <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i> Unggah Video dari Perangkat
+        </button>
+        <button onclick="startLiveStream()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-90 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg">
+          <i data-lucide="radio" class="w-5 h-5"></i> Mulai Live Streaming 🔴
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Perekaman Video Langsung -->
+    <div id="modal-record" class="hidden absolute inset-0 z-50 bg-black flex flex-col justify-between p-4 pt-16 pb-12">
+      <div class="flex justify-between items-center z-10">
+        <h3 class="font-bold text-amber-400 text-sm">Perekaman Kamera Langsung</h3>
+        <button onclick="closeRecordModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
+      </div>
+      <div class="relative flex-1 my-3 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 flex items-center justify-center">
+        <video id="webcam-preview" class="w-full h-full object-cover" autoplay playsinline muted></video>
+        <div id="record-status" class="absolute top-4 bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold hidden animate-pulse">● MEREKAM...</div>
+      </div>
+      <div class="flex justify-center items-center gap-4 z-10">
+        <button id="btn-start-record" onclick="startCameraRecording()" class="bg-red-500 hover:bg-red-400 text-white px-6 py-3 rounded-full font-bold text-xs shadow-lg flex items-center gap-2">
+          🔴 Mulai Rekam
+        </button>
+        <button id="btn-stop-record" onclick="stopCameraRecording()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-full font-bold text-xs shadow-lg hidden">
+          ⏹️ Selesai & Simpan
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Kirim Hadiah (Virtual Gifts) -->
+    <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
+      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <h3 class="font-bold text-sm text-amber-400">Kirim Hadiah Virtual 🎁</h3>
+          <button onclick="closeGiftModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <div class="grid grid-cols-3 gap-3 text-center text-xs">
+          <button onclick="sendGift('🌹 Mawar', 10)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
+            <span class="text-2xl block mb-1">🌹</span>
+            <span class="font-bold text-white">Mawar</span>
+            <span class="block text-[10px] text-amber-400">10 Koin</span>
+          </button>
+          <button onclick="sendGift('⭐ Bintang', 50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
+            <span class="text-2xl block mb-1">⭐</span>
+            <span class="font-bold text-white">Bintang</span>
+            <span class="block text-[10px] text-amber-400">50 Koin</span>
+          </button>
+          <button onclick="sendGift('🚀 Roket', 500)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
+            <span class="text-2xl block mb-1">🚀</span>
+            <span class="font-bold text-white">Roket</span>
+            <span class="block text-[10px] text-amber-400">500 Koin</span>
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Modal Komentar Interaktif -->
     <div id="modal-comments" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
