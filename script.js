@@ -1,17 +1,4 @@
-// Konfigurasi Supabase
-const SUPABASE_URL = 'https://orslkapqqmqnzflxeqnl.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; 
-let supabase = null;
-
-try {
-  if (window.supabase && SUPABASE_URL.startsWith('http')) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
-} catch (e) {
-  console.warn('Supabase belum aktif sepenuhnya, menggunakan mode lokal.');
-}
-
-// Data Konten Publik (Video, Foto, dan Siaran Live)
+// Data Konten Publik (Video, Foto, dan Siaran Live yang dapat di-scroll semua pengguna)
 let MOCK_VIDEOS = [
   {
     id: 'post_1',
@@ -21,7 +8,6 @@ let MOCK_VIDEOS = [
     type: 'video',
     media_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
     likes_count: 15,
-    comments_count: 1,
     comments: [
       { username: '@kreator_tatap', text: 'Halo @agus123, selamat bergabung!' }
     ]
@@ -34,7 +20,6 @@ let MOCK_VIDEOS = [
     type: 'video',
     media_url: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-beach-with-waves-41537-large.mp4',
     likes_count: 1240,
-    comments_count: 2,
     comments: [
       { username: '@budi_santoso', text: 'Keren banget pemandangannya!' }
     ]
@@ -49,22 +34,26 @@ let mediaRecorder;
 let recordedChunks = [];
 let localCameraStream = null;
 
+// Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
-  // Pastikan splash screen pasti hilang setelah 2 detik apapun yang terjadi
+  // Menghilangkan splash screen secara mulus setelah 1.8 detik
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if (splash) {
       splash.style.opacity = '0';
       setTimeout(() => splash.remove(), 700);
     }
-  }, 2000);
+  }, 1800);
 
+  // Inisialisasi ikon Lucide
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
-  // Coba ambil data dari Supabase, jika gagal tetap lanjutkan render data lokal
-  initAppData();
+  // Render konten awal
+  renderFeed();
+  renderActiveLives();
+  renderExploreGrid();
 
-  // Listener untuk pencarian real-time di menu Temukan
+  // Listener untuk kolom pencarian real-time di menu Temukan (Mendukung pencarian @agus123)
   const searchInput = document.getElementById('search-input');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -73,67 +62,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wajib daftar/masuk saat pertama kali buka aplikasi
+  // Wajib daftar/masuk saat pertama kali membuka aplikasi
   openAuthModal('register');
 });
 
-async function initAppData() {
-  if (!supabase) {
-    renderFeed();
-    renderActiveLives();
-    renderExploreGrid();
-    return;
-  }
-
-  try {
-    const { data: videos, error: vidError } = await supabase
-      .from('videos')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!vidError && videos && videos.length > 0) {
-      MOCK_VIDEOS = videos;
-    }
-
-    const { data: lives, error: liveError } = await supabase
-      .from('live_streams')
-      .select('*')
-      .eq('is_active', true);
-
-    if (!liveError && lives) {
-      ACTIVE_LIVES = lives;
-    }
-
-    // Berlangganan perubahan real-time jika tabel tersedia
-    supabase
-      .channel('public:all_changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'videos' }, payload => {
-        initAppData();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_streams' }, payload => {
-        fetchActiveLivesOnly();
-      })
-      .subscribe();
-
-  } catch (err) {
-    console.warn('Menggunakan data lokal cadangan.');
-  }
-
-  renderFeed();
-  renderActiveLives();
-  renderExploreGrid();
-}
-
-async function fetchActiveLivesOnly() {
-  if (!supabase) return;
-  const { data, error } = await supabase.from('live_streams').select('*').eq('is_active', true);
-  if (!error && data) {
-    ACTIVE_LIVES = data;
-    renderActiveLives();
-  }
-}
-
-// Switch Tab Beranda, Temukan, Kotak Masuk, Profil
+// Fungsi Berpindah Tab (Beranda, Temukan, Kotak Masuk, Profil)
 function switchTab(tab) {
   if (!currentUser) {
     alert('Silakan mendaftar atau masuk terlebih dahulu!');
@@ -181,7 +114,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Feed Publik
+// Render Beranda Utama (Feed Publik)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -214,7 +147,7 @@ function renderFeed() {
       `;
     }
 
-    const commentsCount = itemData.comments ? itemData.comments.length : (itemData.comments_count || 0);
+    const commentsCount = itemData.comments ? itemData.comments.length : 0;
 
     card.innerHTML = `
       ${mediaElement}
@@ -263,6 +196,7 @@ function renderFeed() {
   setupAutoplayObserver();
 }
 
+// Render Badge Siaran Live Aktif di Menu Temukan
 function renderActiveLives() {
   const container = document.getElementById('active-live-list');
   if (!container) return;
@@ -375,7 +309,7 @@ function startCameraRecording() {
     if (event.data.size > 0) recordedChunks.push(event.data);
   };
 
-  mediaRecorder.onstop = async () => {
+  mediaRecorder.onstop = () => {
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const videoUrl = URL.createObjectURL(blob);
     
@@ -391,10 +325,6 @@ function startCameraRecording() {
     };
 
     MOCK_VIDEOS.unshift(newPost);
-    if (supabase) {
-      supabase.from('videos').insert([newPost]).then(() => {});
-    }
-
     renderFeed();
     renderExploreGrid();
     closeRecordModal();
@@ -436,13 +366,6 @@ async function startLiveStream() {
         comments: []
       });
     }
-
-    if (supabase) {
-      supabase.from('live_streams').upsert([
-        { username: currentUser.username, caption: liveObj.caption, is_active: true }
-      ], { onConflict: 'username' }).then(() => {});
-    }
-
     document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
   }
 
@@ -458,7 +381,7 @@ async function startLiveStream() {
   }
 }
 
-async function stopLiveStream() {
+function stopLiveStream() {
   const liveVideo = document.getElementById('live-video-stream');
   if (liveVideo.srcObject) {
     liveVideo.srcObject.getTracks().forEach(track => track.stop());
@@ -467,10 +390,6 @@ async function stopLiveStream() {
   if (currentUser) {
     ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
     MOCK_VIDEOS = MOCK_VIDEOS.filter(v => v.type !== 'live' || v.username !== currentUser.username);
-    
-    if (supabase) {
-      supabase.from('live_streams').update({ is_active: false }).eq('username', currentUser.username).then(() => {});
-    }
   }
   document.getElementById('guest-slot-1').classList.add('hidden');
   document.getElementById('live-room-view').classList.add('hidden');
@@ -518,7 +437,7 @@ function previewMediaFile(e) {
   }
 }
 
-async function handleUploadSubmit(e) {
+function handleUploadSubmit(e) {
   e.preventDefault();
   const mediaType = document.getElementById('upload-media-type').value;
   const caption = document.getElementById('upload-caption').value;
@@ -536,10 +455,6 @@ async function handleUploadSubmit(e) {
   };
 
   MOCK_VIDEOS.unshift(newPost);
-  if (supabase) {
-    supabase.from('videos').insert([newPost]).then(() => {});
-  }
-
   renderFeed();
   renderExploreGrid();
   closeUploadModal();
