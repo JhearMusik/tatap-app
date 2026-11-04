@@ -52,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderActiveLives();
   renderExploreGrid();
 
-  // Listener untuk pencarian real-time di menu Temukan (Mendukung pencarian nama user seperti @agus123)
   const searchInput = document.getElementById('search-input');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -61,7 +60,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wajib daftar/masuk saat pertama kali buka aplikasi
   openAuthModal('register');
 });
 
@@ -113,7 +111,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Feed Publik
+// Render Feed Publik (Mendukung Video, Foto, dan Kartu Siaran Live)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -128,15 +126,15 @@ function renderFeed() {
       mediaElement = `<img src="${itemData.media_url}" class="w-full h-full object-cover">`;
     } else if (itemData.type === 'live') {
       mediaElement = `
-        <div class="w-full h-full bg-gradient-to-tr from-slate-900 to-red-950 flex flex-col items-center justify-center p-6 text-center">
-          <div class="w-20 h-20 rounded-full bg-red-600/30 flex items-center justify-center animate-pulse mb-4 border-2 border-red-500">
+        <div class="w-full h-full bg-gradient-to-tr from-slate-950 via-red-950 to-black flex flex-col items-center justify-center p-6 text-center">
+          <div class="w-20 h-20 rounded-full bg-red-600/30 flex items-center justify-center animate-pulse mb-4 border-2 border-red-500 shadow-2xl">
             <i data-lucide="radio" class="w-10 h-10 text-red-500"></i>
           </div>
-          <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full mb-2 animate-bounce">🔴 SEDANG LIVE</span>
-          <h3 class="font-bold text-lg text-white">${itemData.username}</h3>
-          <p class="text-xs text-slate-300 mt-1">${itemData.caption}</p>
-          <button onclick="startLiveStream()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-2.5 rounded-full text-xs shadow-lg transition">
-            Gabung Siaran Live Sekarang
+          <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full mb-3 animate-bounce">🔴 SEDANG SIARAN LANGSUNG</span>
+          <h3 class="font-bold text-xl text-white">${itemData.username}</h3>
+          <p class="text-xs text-slate-300 mt-1 max-w-xs">${itemData.caption}</p>
+          <button onclick="startLiveStream()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3 rounded-full text-xs shadow-xl transition transform hover:scale-105">
+            Gabung ke Live Sekarang
           </button>
         </div>
       `;
@@ -343,14 +341,34 @@ async function startLiveStream() {
   closeCreateMenuModal();
   document.getElementById('live-room-view').classList.remove('hidden');
 
-  if (currentUser && !ACTIVE_LIVES.some(l => l.username === currentUser.username)) {
-    ACTIVE_LIVES.push({
-      id: 'live_' + Date.now(),
-      username: currentUser.username,
-      caption: 'Sedang Siaran Langsung 🔴'
-    });
+  if (currentUser) {
+    const liveId = 'live_' + currentUser.username;
+    // Tambahkan ke ACTIVE_LIVES jika belum ada
+    if (!ACTIVE_LIVES.some(l => l.username === currentUser.username)) {
+      ACTIVE_LIVES.push({
+        id: liveId,
+        username: currentUser.username,
+        caption: 'Sedang Siaran Langsung 🔴'
+      });
+    }
+    // Tambahkan juga ke MOCK_VIDEOS agar muncul saat di-scroll di beranda
+    if (!MOCK_VIDEOS.some(v => v.id === liveId)) {
+      MOCK_VIDEOS.unshift({
+        id: liveId,
+        username: currentUser.username,
+        caption: `Siaran langsung interaktif oleh ${currentUser.username}`,
+        music: 'Live Audio',
+        type: 'live',
+        likes_count: 0,
+        comments_count: 0,
+        comments: []
+      });
+    }
     document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
   }
+
+  renderFeed();
+  renderActiveLives();
 
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -369,10 +387,12 @@ function stopLiveStream() {
   }
   if (currentUser) {
     ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
+    MOCK_VIDEOS = MOCK_VIDEOS.filter(v => v.type !== 'live' || v.username !== currentUser.username);
   }
   document.getElementById('guest-slot-1').classList.add('hidden');
   document.getElementById('live-room-view').classList.add('hidden');
   switchTab('feed');
+  renderFeed();
   renderActiveLives();
 }
 
@@ -461,9 +481,14 @@ function renderExploreGrid(filterKeyword = '') {
     const card = document.createElement('div');
     card.className = 'relative bg-slate-800 rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border border-slate-700/50';
     
-    let content = video.type === 'image' 
-      ? `<img class="w-full h-full object-cover" src="${video.media_url}">` 
-      : `<video class="w-full h-full object-cover" src="${video.media_url}"></video>`;
+    let content = '';
+    if (video.type === 'image') {
+      content = `<img class="w-full h-full object-cover" src="${video.media_url}">`;
+    } else if (video.type === 'live') {
+      content = `<div class="w-full h-full bg-red-950 flex items-center justify-center font-bold text-red-400 text-xs">🔴 LIVE STREAM</div>`;
+    } else {
+      content = `<video class="w-full h-full object-cover" src="${video.media_url}"></video>`;
+    }
       
     card.innerHTML = `
       ${content}
