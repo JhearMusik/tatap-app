@@ -46,27 +46,27 @@
       </div>
     </header>
 
-    <!-- Main Feed / Beranda -->
+    <!-- Main Feed / Beranda Publik (Bisa di-scroll untuk semua user) -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
-      <!-- Video items dimuat via script.js -->
+      <!-- Video publik dimuat via script.js -->
     </main>
 
     <!-- Halaman Temukan (Explore) -->
     <div id="explore-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20 space-y-4">
       <div class="relative">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-        <input type="text" placeholder="Cari video, tag, atau kreator..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+        <input type="text" placeholder="Cari video, foto, atau kreator..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
       </div>
       <div>
         <h4 class="text-xs font-bold text-amber-400 mb-2">🔥 Topik Hangat</h4>
         <div class="flex gap-2 overflow-x-auto no-scrollbar pb-1 text-xs">
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#TATAP</span>
-          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#KulinerBuol</span>
-          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Viral</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#DesaPaleleh</span>
+          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Buol</span>
         </div>
       </div>
       <div>
-        <h4 class="text-xs font-bold text-slate-300 mb-2">Video Populer</h4>
+        <h4 class="text-xs font-bold text-slate-300 mb-2">Jelajahi Konten Publik</h4>
         <div class="grid grid-cols-2 gap-2" id="explore-grid"></div>
       </div>
     </div>
@@ -75,16 +75,16 @@
     <div id="inbox-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <h3 class="font-bold text-base text-amber-400">Kotak Masuk</h3>
-        <span class="text-[10px] bg-amber-400 text-black px-2 py-0.5 rounded-full font-bold">3 Baru</span>
+        <span class="text-[10px] bg-amber-400 text-black px-2 py-0.5 rounded-full font-bold">Notifikasi</span>
       </div>
-      <div class="space-y-2">
+      <div class="space-y-2" id="inbox-list">
         <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
           <div class="w-9 h-9 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
             <i data-lucide="heart" class="w-5 h-5"></i>
           </div>
           <div class="flex-1 text-xs">
-            <p><strong class="text-white">@nature_vibes</strong> menyukai video Anda.</p>
-            <span class="text-[10px] text-slate-500">2 jam yang lalu</span>
+            <p><strong class="text-white">@pengguna_tatap</strong> mengunggah video baru di Desa Paleleh!</p>
+            <span class="text-[10px] text-slate-500">Baru saja</span>
           </div>
         </div>
       </div>
@@ -118,17 +118,17 @@
       <div class="relative z-10 flex justify-between items-center">
         <div class="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
           <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
-          <span class="text-xs font-bold text-red-400">LIVE</span>
+          <span class="text-xs font-bold text-red-400">SIARAN LANGSUNG (LIVE)</span>
         </div>
         <button onclick="stopLiveStream()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold transition">Akhiri Live</button>
       </div>
       <div id="live-guest-container" class="relative z-10 grid grid-cols-2 gap-2 my-auto">
         <div class="relative bg-slate-800/50 border border-amber-400/50 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
-          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host</span>
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host Utama</span>
         </div>
         <div id="guest-slot-1" class="hidden relative bg-slate-800/80 border border-slate-600 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
           <video id="guest-video-element" class="w-full h-full object-cover" autoplay playsinline></video>
-          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu</span>
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu Diundang</span>
         </div>
       </div>
       <div class="relative z-10 space-y-3">
@@ -166,29 +166,29 @@
       </button>
     </nav>
 
-    <!-- Modal Pilihan Tombol (+) -->
+    <!-- Modal Pilihan Konten (+) -->
     <div id="modal-create-menu" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-3 shadow-2xl text-center">
         <div class="flex justify-between items-center mb-2">
-          <h3 class="text-lg font-bold text-amber-400">Buat Konten Baru</h3>
+          <h3 class="text-lg font-bold text-amber-400">Buat Konten Publik</h3>
           <button onclick="closeCreateMenuModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <button onclick="openRecordModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition">
-          <i data-lucide="video" class="w-5 h-5 text-amber-400"></i> Rekam Video Langsung
+          <i data-lucide="video" class="w-5 h-5 text-amber-400"></i> Rekam Video / Foto Kamera
         </button>
         <button onclick="openUploadModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-semibold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition">
-          <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i> Unggah Video dari Perangkat
+          <i data-lucide="upload" class="w-5 h-5 text-blue-400"></i> Unggah File Foto / Video
         </button>
         <button onclick="startLiveStream()" class="w-full bg-gradient-to-r from-red-600 to-amber-600 hover:opacity-90 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg">
-          <i data-lucide="radio" class="w-5 h-5"></i> Mulai Live Streaming 🔴
+          <i data-lucide="radio" class="w-5 h-5"></i> Mulai Siaran Langsung (Live) 🔴
         </button>
       </div>
     </div>
 
-    <!-- Modal Perekaman Video -->
+    <!-- Modal Perekaman Kamera -->
     <div id="modal-record" class="hidden absolute inset-0 z-50 bg-black flex flex-col justify-between p-4 pt-16 pb-12">
       <div class="flex justify-between items-center z-10">
-        <h3 class="font-bold text-amber-400 text-sm">Perekaman Kamera Langsung</h3>
+        <h3 class="font-bold text-amber-400 text-sm">Rekam Kamera Langsung</h3>
         <button onclick="closeRecordModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
       </div>
       <div class="relative flex-1 my-3 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 flex items-center justify-center">
@@ -200,12 +200,45 @@
           🔴 Mulai Rekam
         </button>
         <button id="btn-stop-record" onclick="stopCameraRecording()" class="bg-slate-700 hover:bg-slate-600 text-white px-6 py-3 rounded-full font-bold text-xs shadow-lg hidden">
-          ⏹️ Selesai & Simpan
+          ⏹️ Selesai & Bagikan Publik
         </button>
       </div>
     </div>
 
-    <!-- Modal Kirim Hadiah -->
+    <!-- Modal Upload File (Foto / Video) -->
+    <div id="modal-upload" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center">
+          <h3 class="text-lg font-bold text-amber-400">Unggah Foto / Video</h3>
+          <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+
+        <form id="form-upload" onsubmit="handleUploadSubmit(event)" class="space-y-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Pilih Jenis Konten</label>
+            <select id="upload-media-type" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 mb-2">
+              <option value="video">🎥 Video Pendek</option>
+              <option value="image">🖼️ Foto Gambar</option>
+            </select>
+            
+            <input type="file" id="upload-file" accept="video/*,image/*" class="hidden" onchange="previewMediaFile(event)">
+            <button type="button" onclick="document.getElementById('upload-file').click()" class="w-full bg-slate-800 border border-dashed border-slate-600 rounded-lg p-3 text-xs text-slate-300 hover:border-amber-400 text-center">
+              📁 Pilih File dari Galeri Perangkat
+            </button>
+            <input type="url" id="upload-url" placeholder="Atau tempelkan URL Media (http...)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 mt-2">
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Caption / Deskripsi</label>
+            <textarea id="upload-caption" placeholder="Tulis deskripsi konten #Paleleh #Buol..." required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 h-20 resize-none"></textarea>
+          </div>
+
+          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Bagikan Agar Bisa Dilihat Semua Orang</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal Gift & Modal Komentar/Share & Auth tetap sama -->
     <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -214,25 +247,18 @@
         </div>
         <div class="grid grid-cols-3 gap-3 text-center text-xs">
           <button onclick="sendGift('🌹 Mawar', 10)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
-            <span class="text-2xl block mb-1">🌹</span>
-            <span class="font-bold text-white">Mawar</span>
-            <span class="block text-[10px] text-amber-400">10 Koin</span>
+            <span class="text-2xl block mb-1">🌹</span><span class="font-bold text-white">Mawar</span>
           </button>
           <button onclick="sendGift('⭐ Bintang', 50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
-            <span class="text-2xl block mb-1">⭐</span>
-            <span class="font-bold text-white">Bintang</span>
-            <span class="block text-[10px] text-amber-400">50 Koin</span>
+            <span class="text-2xl block mb-1">⭐</span><span class="font-bold text-white">Bintang</span>
           </button>
           <button onclick="sendGift('🚀 Roket', 500)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition">
-            <span class="text-2xl block mb-1">🚀</span>
-            <span class="font-bold text-white">Roket</span>
-            <span class="block text-[10px] text-amber-400">500 Koin</span>
+            <span class="text-2xl block mb-1">🚀</span><span class="font-bold text-white">Roket</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Modal Komentar -->
     <div id="modal-comments" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 w-full h-[60vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -247,62 +273,33 @@
       </div>
     </div>
 
-    <!-- Modal Share -->
     <div id="modal-share" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="font-bold text-sm text-amber-400">Bagikan Video</h3>
+          <h3 class="font-bold text-sm text-amber-400">Bagikan</h3>
           <button onclick="closeShareModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="grid grid-cols-4 gap-4 text-center text-xs text-slate-300 py-2">
           <button onclick="shareToSocial('WhatsApp')" class="flex flex-col items-center gap-1 hover:text-white">
-            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white"><i data-lucide="message-circle" class="w-6 h-6"></i></div>
-            WhatsApp
-          </button>
-          <button onclick="shareToSocial('Facebook')" class="flex flex-col items-center gap-1 hover:text-white">
-            <div class="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center text-white"><i data-lucide="facebook" class="w-6 h-6"></i></div>
-            Facebook
-          </button>
-          <button onclick="shareToSocial('Twitter')" class="flex flex-col items-center gap-1 hover:text-white">
-            <div class="w-12 h-12 rounded-full bg-sky-500 flex items-center justify-center text-white"><i data-lucide="twitter" class="w-6 h-6"></i></div>
-            Twitter
+            <div class="w-12 h-12 rounded-full bg-green-600 flex items-center justify-center text-white"><i data-lucide="message-circle" class="w-6 h-6"></i></div>WhatsApp
           </button>
           <button onclick="copyVideoLink()" class="flex flex-col items-center gap-1 hover:text-white">
-            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white"><i data-lucide="link" class="w-6 h-6"></i></div>
-            Salin Link
+            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white"><i data-lucide="link" class="w-6 h-6"></i></div>Salin Link
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Modal Autentikasi (Wajib Daftar/Register Pertama) -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
           <h3 id="auth-title" class="text-lg font-bold text-amber-400">Daftar Akun TATAP</h3>
           <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white hidden"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Daftar</button>
           <button id="tab-login" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Masuk</button>
         </div>
-
-        <div class="space-y-2 pt-1">
-          <button onclick="loginWithFacebook()" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white py-2 rounded-lg text-xs font-medium transition">
-            <i data-lucide="facebook" class="w-4 h-4"></i> Lanjutkan dengan Facebook
-          </button>
-          <button onclick="loginWithTwitter()" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 hover:bg-slate-700 text-white py-2 rounded-lg text-xs font-medium transition">
-            <i data-lucide="twitter" class="w-4 h-4 text-sky-400"></i> Lanjutkan dengan Twitter (X)
-          </button>
-        </div>
-
-        <div class="flex items-center my-2">
-          <div class="flex-1 border-t border-slate-700"></div>
-          <span class="px-3 text-[10px] text-slate-400 uppercase">Atau Email</span>
-          <div class="flex-1 border-t border-slate-700"></div>
-        </div>
-
         <form id="form-auth" onsubmit="handleAuthSubmit(event)" class="space-y-3">
           <div id="group-username">
             <label class="block text-xs font-medium text-slate-300 mb-1">Nama Pengguna</label>
@@ -321,71 +318,15 @@
       </div>
     </div>
 
-    <!-- Modal Upload Video -->
-    <div id="modal-upload" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center">
-          <h3 class="text-lg font-bold text-amber-400">Posting Video Baru</h3>
-          <button onclick="closeUploadModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-        </div>
-
-        <form id="form-upload" onsubmit="handleUploadSubmit(event)" class="space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">File Video / URL Video</label>
-            <input type="file" id="upload-file" accept="video/*" class="hidden" onchange="previewVideoFile(event)">
-            <button type="button" onclick="document.getElementById('upload-file').click()" class="w-full bg-slate-800 border border-dashed border-slate-600 rounded-lg p-3 text-xs text-slate-300 hover:border-amber-400 text-center">
-              📁 Pilih File Video dari Perangkat
-            </button>
-            <input type="url" id="upload-url" placeholder="Atau tempelkan URL video (http...)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 mt-2">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Caption / Keterangan</label>
-            <textarea id="upload-caption" placeholder="Tulis deskripsi video #tag..." required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 h-20 resize-none"></textarea>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan Suara / Audio</label>
-            <select id="upload-audio-type" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-              <option value="Suara Asli">🎙️ Suara Asli Pengguna</option>
-              <option value="Musik Hits - TATAP Studio">🎵 Musik Hits - TATAP Studio</option>
-            </select>
-          </div>
-          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Posting Sekarang</button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Modal Edit Profil -->
     <div id="modal-edit-profile" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
           <h3 class="text-lg font-bold text-amber-400">Edit Data Diri</h3>
           <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-
         <form id="form-edit-profile" onsubmit="handleProfileSubmit(event)" class="space-y-3">
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Nama Lengkap / Username</label>
-            <input type="text" id="edit-name" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-          </div>
-          <div class="flex gap-2">
-            <div class="w-1/2">
-              <label class="block text-xs font-medium text-slate-300 mb-1">Umur</label>
-              <input type="number" id="edit-age" placeholder="25" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-            </div>
-            <div class="w-1/2">
-              <label class="block text-xs font-medium text-slate-300 mb-1">Pekerjaan</label>
-              <input type="text" id="edit-job" placeholder="Kreator" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Hobi</label>
-            <input type="text" id="edit-hobby" placeholder="Membaca, Videografi" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-slate-300 mb-1">Status</label>
-            <input type="text" id="edit-status" placeholder="Bio / Kata-kata hari ini..." class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
-          </div>
-          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Simpan Perubahan</button>
+          <div><input type="text" id="edit-name" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></div>
+          <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs">Simpan</button>
         </form>
       </div>
     </div>
