@@ -37,10 +37,18 @@ let localCameraStream = null;
 // Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
   const splashVideo = document.getElementById('splash-video');
+  
+  // Jika video selesai diputar, hilangkan splash screen baru buka form daftar
   if (splashVideo) {
-    splashVideo.onended = () => { hideSplash(); };
+    splashVideo.onended = () => { 
+      hideSplashAndOpenAuth(); 
+    };
   }
-  setTimeout(() => { hideSplash(); }, 5000);
+  
+  // Fallback cadangan jika video gagal memicu event onended (misal dalam 5 detik)
+  setTimeout(() => { 
+    hideSplashAndOpenAuth(); 
+  }, 5000);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
@@ -55,16 +63,21 @@ document.addEventListener('DOMContentLoaded', () => {
       renderExploreGrid(keyword);
     });
   }
-
-  openAuthModal('register');
 });
 
-function hideSplash() {
+// Fungsi khusus: Menghilangkan Splash Screen secara mulus DAHULU, baru menampilkan Form Auth
+function hideSplashAndOpenAuth() {
   const splash = document.getElementById('splash-screen');
   if (splash && !splash.classList.contains('fade-out')) {
     splash.classList.add('fade-out');
     splash.style.opacity = '0';
-    setTimeout(() => splash.remove(), 700);
+    setTimeout(() => {
+      splash.remove();
+      // Tampilkan form pendaftaran/masuk HANYA SETELAH splash screen selesai hilang
+      if (!currentUser) {
+        openAuthModal('register');
+      }
+    }, 700);
   }
 }
 
