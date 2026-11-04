@@ -36,13 +36,11 @@ let localCameraStream = null;
 
 // Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    const splash = document.getElementById('splash-screen');
-    if (splash) {
-      splash.style.opacity = '0';
-      setTimeout(() => splash.remove(), 700);
-    }
-  }, 1800);
+  const splashVideo = document.getElementById('splash-video');
+  if (splashVideo) {
+    splashVideo.onended = () => { hideSplash(); };
+  }
+  setTimeout(() => { hideSplash(); }, 5000);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
@@ -60,6 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   openAuthModal('register');
 });
+
+function hideSplash() {
+  const splash = document.getElementById('splash-screen');
+  if (splash && !splash.classList.contains('fade-out')) {
+    splash.classList.add('fade-out');
+    splash.style.opacity = '0';
+    setTimeout(() => splash.remove(), 700);
+  }
+}
 
 // Fungsi Berpindah Tab
 function switchTab(tab) {
@@ -123,7 +130,6 @@ function renderFeed() {
     if (itemData.type === 'image') {
       mediaElement = `<img src="${itemData.media_url}" class="w-full h-full object-cover">`;
     } else if (itemData.type === 'live') {
-      // Jika tipe konten adalah live, tampilkan kartu siaran langsung interaktif di dalam feed scroll
       mediaElement = `
         <div class="relative w-full h-full bg-slate-950 flex flex-col justify-between p-4 pt-16 pb-20">
           <div class="absolute inset-0 z-0">
@@ -198,7 +204,6 @@ function renderFeed() {
         }
       });
     } else if (itemData.type === 'live' && localCameraStream) {
-      // Hubungkan stream kamera aktif ke elemen video live di feed
       setTimeout(() => {
         const liveVideoEl = document.getElementById(`feed-live-video-${itemData.id}`);
         if (liveVideoEl && !liveVideoEl.srcObject) {
@@ -377,7 +382,6 @@ async function startLiveStream() {
           caption: 'Sedang Siaran Langsung 🔴'
         });
       }
-      // Masukkan ke MOCK_VIDEOS agar otomatis bisa di-scroll di beranda utama bersama video lain
       if (!MOCK_VIDEOS.some(v => v.id === liveId)) {
         MOCK_VIDEOS.unshift({
           id: liveId,
