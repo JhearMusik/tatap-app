@@ -1,4 +1,3 @@
-// Data Video Utama
 let MOCK_VIDEOS = [
   {
     id: '1',
@@ -15,23 +14,14 @@ let MOCK_VIDEOS = [
   }
 ];
 
-let authMode = 'login';
-let currentUser = {
-  username: '@kreator_tatap',
-  name: 'Pengguna TATAP',
-  age: 24,
-  job: 'Konten Kreator',
-  hobby: 'Traveling & Videografi',
-  status: 'Selalu melihat hal positif ✨'
-};
-
+let authMode = 'register'; // Default wajib daftar
+let currentUser = null;    // Belum ada user sebelum daftar
 let activeVideoId = null;
 let mediaRecorder;
 let recordedChunks = [];
 let localCameraStream = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Splash screen durasi 2 detik
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if (splash) {
@@ -41,13 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 2000);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
-  renderFeed();
-  updateProfileDisplay();
-  setupAutoplayObserver();
+
+  // WAJIB: Langsung munculkan modal pendaftaran saat pertama buka aplikasi
+  openAuthModal('register');
 });
 
 // Switch Tab Beranda, Temukan, Kotak Masuk, Profil
 function switchTab(tab) {
+  if (!currentUser) {
+    alert('Silakan mendaftar atau masuk terlebih dahulu untuk mengakses fitur ini!');
+    openAuthModal('register');
+    return;
+  }
+
   const feed = document.getElementById('video-feed');
   const explore = document.getElementById('explore-view');
   const inbox = document.getElementById('inbox-view');
@@ -137,14 +133,13 @@ function renderFeed() {
   setupAutoplayObserver();
 }
 
-// Autoplay Observer
 function setupAutoplayObserver() {
   const options = { threshold: 0.6 };
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       const video = entry.target.querySelector('video');
       if (video) {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && currentUser) {
           video.muted = false;
           video.play().catch(() => {
             video.muted = true;
@@ -165,12 +160,18 @@ function pauseAllVideos() {
 }
 
 function playVisibleVideo() {
+  if (!currentUser) return;
   const firstVideo = document.querySelector('.video-card video');
   if (firstVideo) firstVideo.play().catch(() => {});
 }
 
-// ----------------- FITUR TOMBOL (+) & PEREKAMAN LANGSUNG -----------------
+// ----------------- KONTROL TOMBOL (+) & FITUR LAINNYA -----------------
 function openCreateMenuModal() {
+  if (!currentUser) {
+    alert('Silakan daftar atau masuk terlebih dahulu untuk membuat konten!');
+    openAuthModal('register');
+    return;
+  }
   document.getElementById('modal-create-menu').classList.remove('hidden');
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
@@ -184,8 +185,7 @@ async function openRecordModal() {
   document.getElementById('modal-record').classList.remove('hidden');
   try {
     localCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    const webcamPreview = document.getElementById('webcam-preview');
-    webcamPreview.srcObject = localCameraStream;
+    document.getElementById('webcam-preview').srcObject = localCameraStream;
   } catch (err) {
     alert('Gagal mengakses kamera/mikrofon: ' + err.message);
     closeRecordModal();
@@ -219,11 +219,10 @@ function startCameraRecording() {
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const videoUrl = URL.createObjectURL(blob);
     
-    // Masukkan ke data postingan baru
     const newPost = {
       id: Date.now().toString(),
       username: currentUser.username,
-      caption: 'Video hasil rekaman langsung kamera 🎥 #TATAP #LiveRecord',
+      caption: 'Video hasil rekaman langsung kamera 🎥 #TATAP',
       music: `Suara Asli - ${currentUser.username}`,
       video_url: videoUrl,
       likes_count: 0,
@@ -235,7 +234,7 @@ function startCameraRecording() {
     renderFeed();
     closeRecordModal();
     switchTab('feed');
-    alert('Video rekaman berhasil disimpan dan dibagikan ke semua orang!');
+    alert('Video rekaman berhasil disimpan dan dibagikan!');
   };
 
   mediaRecorder.start();
@@ -245,21 +244,15 @@ function startCameraRecording() {
 }
 
 function stopCameraRecording() {
-  if (mediaRecorder) {
-    mediaRecorder.stop();
-  }
+  if (mediaRecorder) mediaRecorder.stop();
 }
 
-// ----------------- FITUR LIVE STREAMING & TAMU (CO-HOST) -----------------
 async function startLiveStream() {
   closeCreateMenuModal();
-  const liveRoom = document.getElementById('live-room-view');
-  liveRoom.classList.remove('hidden');
-
+  document.getElementById('live-room-view').classList.remove('hidden');
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    const liveVideo = document.getElementById('live-video-stream');
-    liveVideo.srcObject = stream;
+    document.getElementById('live-video-stream').srcObject = stream;
   } catch (e) {
     alert('Gagal memulai kamera Live: ' + e.message);
     stopLiveStream();
@@ -283,35 +276,25 @@ function stopLiveStream() {
 }
 
 async function inviteGuestToLive() {
-  const guestSlot = document.getElementById('guest-slot-1');
-  guestSlot.classList.remove('hidden');
+  document.getElementById('guest-slot-1').classList.remove('hidden');
   try {
-    // Simulasi mengundang tamu co-host (menggunakan kamera sekunder/utama)
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    const guestVideoEl = document.getElementById('guest-video-element');
-    guestVideoEl.srcObject = guestStream;
+    document.getElementById('guest-video-element').srcObject = guestStream;
     alert('Berhasil mengundang tamu kedalam live stream!');
   } catch (e) {
     alert('Gagal menghubungkan tamu: ' + e.message);
   }
 }
 
-// ----------------- FITUR KIRIM HADIAH (VIRTUAL GIFTS) -----------------
-function openGiftModal() {
-  document.getElementById('modal-gift').classList.remove('hidden');
-}
-
-function closeGiftModal() {
-  document.getElementById('modal-gift').classList.add('hidden');
-}
-
+function openGiftModal() { document.getElementById('modal-gift').classList.remove('hidden'); }
+function closeGiftModal() { document.getElementById('modal-gift').classList.add('hidden'); }
 function sendGift(giftName, coinValue) {
-  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin kepada Host & Tamu! Terima kasih atas dukungan Anda.`);
+  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin!`);
   closeGiftModal();
 }
 
-// ----------------- KOMENTAR & UPLOAD BIASA -----------------
 function openCommentModal(videoId) {
+  if (!currentUser) { alert('Silakan daftar terlebih dahulu!'); openAuthModal('register'); return; }
   activeVideoId = videoId;
   const video = MOCK_VIDEOS.find(v => v.id === videoId);
   if (!video) return;
@@ -337,7 +320,6 @@ function openCommentModal(videoId) {
       listContainer.appendChild(div);
     });
   }
-
   document.getElementById('modal-comments').classList.remove('hidden');
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
@@ -482,12 +464,17 @@ function updateProfileDisplay() {
   document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
 }
 
-function openAuthModal(mode = 'login') {
+// ----------------- AUTENTIKASI & WAJIB PENDAFTARAN -----------------
+function openAuthModal(mode = 'register') {
   setAuthMode(mode);
   document.getElementById('modal-auth').classList.remove('hidden');
 }
 
 function closeAuthModal() {
+  if (!currentUser) {
+    alert('Anda harus mendaftar atau masuk terlebih dahulu untuk menggunakan aplikasi ini!');
+    return;
+  }
   document.getElementById('modal-auth').classList.add('hidden');
 }
 
@@ -503,12 +490,14 @@ function setAuthMode(mode) {
     title.innerText = 'Masuk ke TATAP';
     btnSubmit.innerText = 'Masuk';
     groupUsername.classList.add('hidden');
+    document.getElementById('auth-username').required = false;
     tabLogin.className = 'flex-1 py-2 rounded-lg bg-amber-400 text-black transition';
     tabRegister.className = 'flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition';
   } else {
     title.innerText = 'Daftar Akun TATAP';
-    btnSubmit.innerText = 'Daftar';
+    btnSubmit.innerText = 'Daftar Akun';
     groupUsername.classList.remove('hidden');
+    document.getElementById('auth-username').required = true;
     tabRegister.className = 'flex-1 py-2 rounded-lg bg-amber-400 text-black transition';
     tabLogin.className = 'flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition';
   }
@@ -516,15 +505,59 @@ function setAuthMode(mode) {
 
 function handleAuthSubmit(e) {
   e.preventDefault();
-  closeAuthModal();
-  alert('Berhasil masuk ke aplikasi TATAP!');
+  const email = document.getElementById('auth-email').value;
+  const usernameInput = document.getElementById('auth-username').value;
+
+  if (authMode === 'register') {
+    currentUser = {
+      username: usernameInput.startsWith('@') ? usernameInput : '@' + usernameInput,
+      name: usernameInput.replace('@', ''),
+      age: 20,
+      job: 'Kreator Baru',
+      hobby: 'Menonton Video',
+      status: 'Anggota baru TATAP ✨'
+    };
+    alert('Pendaftaran berhasil! Selamat datang di TATAP.');
+  } else {
+    currentUser = {
+      username: '@pengguna_tatap',
+      name: email.split('@')[0],
+      age: 24,
+      job: 'Konten Kreator',
+      hobby: 'Traveling',
+      status: 'Senang bisa kembali ✨'
+    };
+    alert('Berhasil masuk ke aplikasi!');
+  }
+
+  updateProfileDisplay();
+  renderFeed();
+  
+  // Tampilkan tombol close (X) setelah berhasil login/daftar
+  document.getElementById('btn-close-auth').classList.remove('hidden');
+  document.getElementById('modal-auth').classList.add('hidden');
 }
 
-function loginWithFacebook() { alert('Fitur login Facebook segera aktif!'); }
-function loginWithTwitter() { alert('Fitur login Twitter segera aktif!'); }
-function loginAsDemo() { closeAuthModal(); alert('Masuk menggunakan Mode Demo.'); }
+function loginWithFacebook() {
+  currentUser = { username: '@facebook_user', name: 'FB User', status: 'Login via Facebook' };
+  updateProfileDisplay();
+  renderFeed();
+  document.getElementById('btn-close-auth').classList.remove('hidden');
+  document.getElementById('modal-auth').classList.add('hidden');
+  alert('Berhasil masuk dengan Facebook!');
+}
+
+function loginWithTwitter() {
+  currentUser = { username: '@twitter_user', name: 'X User', status: 'Login via Twitter' };
+  updateProfileDisplay();
+  renderFeed();
+  document.getElementById('btn-close-auth').classList.remove('hidden');
+  document.getElementById('modal-auth').classList.add('hidden');
+  alert('Berhasil masuk dengan Twitter (X)!');
+}
 
 function toggleLike(btn) {
+  if (!currentUser) { alert('Silakan daftar terlebih dahulu untuk menyukai video!'); openAuthModal('register'); return; }
   const countSpan = btn.querySelector('span');
   let count = parseInt(countSpan.innerText);
   if (btn.classList.contains('text-red-500')) {
