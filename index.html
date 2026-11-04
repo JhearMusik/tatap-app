@@ -4,18 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>TATAP - Platform Video Pendek & Live</title>
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Link CSS Eksternal -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-black text-white font-sans antialiased overflow-hidden flex justify-center items-center">
 
-  <!-- Splash Screen / Intro Grafis (Muncul 2 detik pertama) -->
+  <!-- Splash Screen -->
   <div id="splash-screen" class="absolute inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
     <div class="relative flex flex-col items-center space-y-6">
       <div class="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-500 to-yellow-300 flex items-center justify-center shadow-2xl animate-pulse-glow">
@@ -67,7 +63,6 @@
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#TATAP</span>
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#KulinerBuol</span>
           <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#Viral</span>
-          <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-full text-slate-300 whitespace-nowrap">#LiveStreaming</span>
         </div>
       </div>
       <div>
@@ -92,15 +87,6 @@
             <span class="text-[10px] text-slate-500">2 jam yang lalu</span>
           </div>
         </div>
-        <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
-          <div class="w-9 h-9 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0">
-            <i data-lucide="video" class="w-5 h-5"></i>
-          </div>
-          <div class="flex-1 text-xs">
-            <p><strong class="text-white">@kreator_tatap</strong> sedang melakukan Live Streaming!</p>
-            <span class="text-[10px] text-slate-500">Baru saja</span>
-          </div>
-        </div>
       </div>
     </div>
 
@@ -123,37 +109,28 @@
       </div>
     </div>
 
-    <!-- Tampilan Live Streaming Room (Aktif Saat Live) -->
+    <!-- Tampilan Live Streaming Room -->
     <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-4 pt-16 pb-20">
       <div class="absolute inset-0 z-0">
         <video id="live-video-stream" class="w-full h-full object-cover" autoplay playsinline muted></video>
         <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
       </div>
-
-      <!-- Header Live -->
       <div class="relative z-10 flex justify-between items-center">
         <div class="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
           <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
           <span class="text-xs font-bold text-red-400">LIVE</span>
-          <span class="text-[10px] text-slate-300">| 👥 <span id="live-viewer-count">1.2k</span></span>
         </div>
         <button onclick="stopLiveStream()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold transition">Akhiri Live</button>
       </div>
-
-      <!-- Multi-Guest Grid / Video Tamu Diundang -->
       <div id="live-guest-container" class="relative z-10 grid grid-cols-2 gap-2 my-auto">
-        <!-- Host Utama -->
         <div class="relative bg-slate-800/50 border border-amber-400/50 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
-          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host (@kreator_tatap)</span>
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host</span>
         </div>
-        <!-- Tamu yang Diundang (Hidden jika belum ada) -->
         <div id="guest-slot-1" class="hidden relative bg-slate-800/80 border border-slate-600 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
           <video id="guest-video-element" class="w-full h-full object-cover" autoplay playsinline></video>
-          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu (Co-host)</span>
+          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu</span>
         </div>
       </div>
-
-      <!-- Footer Live: Kontrol, Komentar & Tombol Hadiah -->
       <div class="relative z-10 space-y-3">
         <div class="flex gap-2">
           <button onclick="inviteGuestToLive()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg">
@@ -189,7 +166,7 @@
       </button>
     </nav>
 
-    <!-- Modal Pilihan Tombol (+) : Upload, Rekam Video, atau Live Streaming -->
+    <!-- Modal Pilihan Tombol (+) -->
     <div id="modal-create-menu" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-3 shadow-2xl text-center">
         <div class="flex justify-between items-center mb-2">
@@ -208,7 +185,7 @@
       </div>
     </div>
 
-    <!-- Modal Perekaman Video Langsung -->
+    <!-- Modal Perekaman Video -->
     <div id="modal-record" class="hidden absolute inset-0 z-50 bg-black flex flex-col justify-between p-4 pt-16 pb-12">
       <div class="flex justify-between items-center z-10">
         <h3 class="font-bold text-amber-400 text-sm">Perekaman Kamera Langsung</h3>
@@ -228,7 +205,7 @@
       </div>
     </div>
 
-    <!-- Modal Kirim Hadiah (Virtual Gifts) -->
+    <!-- Modal Kirim Hadiah -->
     <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -255,7 +232,7 @@
       </div>
     </div>
 
-    <!-- Modal Komentar Interaktif -->
+    <!-- Modal Komentar -->
     <div id="modal-comments" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 w-full h-[60vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -270,7 +247,7 @@
       </div>
     </div>
 
-    <!-- Modal Share / Bagikan -->
+    <!-- Modal Share -->
     <div id="modal-share" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -298,17 +275,17 @@
       </div>
     </div>
 
-    <!-- Modal Autentikasi -->
-    <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <!-- Modal Autentikasi (Wajib Daftar/Register Pertama) -->
+    <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
-          <h3 id="auth-title" class="text-lg font-bold text-amber-400">Masuk ke TATAP</h3>
-          <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <h3 id="auth-title" class="text-lg font-bold text-amber-400">Daftar Akun TATAP</h3>
+          <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white hidden"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
-          <button id="tab-login" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Masuk</button>
-          <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Daftar</button>
+          <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Daftar</button>
+          <button id="tab-login" onclick="setAuthMode('login')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition">Masuk</button>
         </div>
 
         <div class="space-y-2 pt-1">
@@ -327,24 +304,20 @@
         </div>
 
         <form id="form-auth" onsubmit="handleAuthSubmit(event)" class="space-y-3">
-          <div id="group-username" class="hidden">
+          <div id="group-username">
             <label class="block text-xs font-medium text-slate-300 mb-1">Nama Pengguna</label>
-            <input type="text" id="auth-username" placeholder="@namapengguna" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <input type="text" id="auth-username" placeholder="@namapengguna" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Email</label>
-            <input type="email" id="auth-email" placeholder="nama@email.com" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <input type="email" id="auth-email" placeholder="nama@email.com" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Kata Sandi</label>
-            <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <input type="password" id="auth-password" placeholder="••••••••" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
           </div>
-          <button type="submit" id="btn-auth-submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Masuk</button>
+          <button type="submit" id="btn-auth-submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Daftar Akun</button>
         </form>
-
-        <div class="text-center pt-1">
-          <button onclick="loginAsDemo()" class="text-xs text-amber-400 hover:underline">Gunakan Mode Demo (Tanpa Akun)</button>
-        </div>
       </div>
     </div>
 
@@ -365,21 +338,17 @@
             </button>
             <input type="url" id="upload-url" placeholder="Atau tempelkan URL video (http...)" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 mt-2">
           </div>
-
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Caption / Keterangan</label>
             <textarea id="upload-caption" placeholder="Tulis deskripsi video #tag..." required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400 h-20 resize-none"></textarea>
           </div>
-
           <div>
             <label class="block text-xs font-medium text-slate-300 mb-1">Pilihan Suara / Audio</label>
             <select id="upload-audio-type" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
               <option value="Suara Asli">🎙️ Suara Asli Pengguna</option>
               <option value="Musik Hits - TATAP Studio">🎵 Musik Hits - TATAP Studio</option>
-              <option value="Acoustic Chill Sound">🎵 Acoustic Chill Sound</option>
             </select>
           </div>
-
           <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs hover:bg-amber-300 transition mt-2">Posting Sekarang</button>
         </form>
       </div>
@@ -423,7 +392,6 @@
 
   </div>
 
-  <!-- Link Script JS Eksternal -->
   <script src="script.js"></script>
 </body>
 </html>
