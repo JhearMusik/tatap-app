@@ -46,24 +46,22 @@
       </div>
     </header>
 
-    <!-- Main Feed / Beranda Publik (Semua video, foto, dan siaran live muncul disini secara berurutan) -->
+    <!-- Main Feed / Beranda Publik -->
     <main id="video-feed" class="flex-1 overflow-y-scroll snap-y-mandatory no-scrollbar relative w-full h-full bg-black">
       <!-- Konten dimuat via script.js -->
     </main>
 
-    <!-- Halaman Temukan (Explore) -->
+    <!-- Halaman Temukan (Explore) dengan Kolom Pencarian Aktif -->
     <div id="explore-view" class="hidden flex-1 overflow-y-auto no-scrollbar relative w-full h-full bg-slate-900 pt-16 px-4 pb-20 space-y-4">
       <div class="relative">
         <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-        <input type="text" placeholder="Cari video, foto, atau siaran live..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+        <input type="text" id="search-input" placeholder="Cari nama pengguna (mis: @agus123) atau video..." class="w-full bg-slate-800 border border-slate-700 rounded-xl pl-9 pr-4 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
       </div>
       
-      <!-- Daftar Pengguna yang Sedang Live (Bisa diklik untuk bergabung) -->
       <div>
         <h4 class="text-xs font-bold text-red-500 mb-2 flex items-center gap-1">🔴 Siaran Langsung (Live) Aktif</h4>
         <div id="active-live-list" class="flex gap-3 overflow-x-auto no-scrollbar pb-2">
-          <!-- Live streams yang aktif muncul di sini -->
-          <p class="text-[11px] text-slate-400 italic">Belum ada siaran langsung saat ini.</p>
+          <p class="text-[11px] text-slate-400 italic">Belum ada siaran langsung aktif.</p>
         </div>
       </div>
 
@@ -79,13 +77,13 @@
         <h3 class="font-bold text-base text-amber-400">Kotak Masuk</h3>
         <span class="text-[10px] bg-amber-400 text-black px-2 py-0.5 rounded-full font-bold">Aktivitas</span>
       </div>
-      <div class="space-y-2" id="inbox-list">
+      <div class="space-y-2">
         <div class="flex items-center space-x-3 bg-slate-800/60 p-3 rounded-xl border border-slate-800">
           <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
             <i data-lucide="bell" class="w-5 h-5"></i>
           </div>
           <div class="flex-1 text-xs">
-            <p><strong class="text-white">Sistem TATAP</strong>: Semua unggahan video, foto, dan siaran live kini bisa dilihat oleh seluruh pengguna secara real-time.</p>
+            <p><strong class="text-white">Sistem TATAP</strong>: Semua unggahan video, foto, dan siaran live tersinkronisasi publik.</p>
             <span class="text-[10px] text-slate-500">Baru saja</span>
           </div>
         </div>
@@ -234,7 +232,7 @@
       </div>
     </div>
 
-    <!-- Modal Gift, Komentar, Share, Auth, Profile tetap lengkap -->
+    <!-- Modal Gift -->
     <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -249,6 +247,7 @@
       </div>
     </div>
 
+    <!-- Modal Komentar -->
     <div id="modal-comments" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 w-full h-[60vh] flex flex-col shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -263,6 +262,7 @@
       </div>
     </div>
 
+    <!-- Modal Share -->
     <div id="modal-share" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -276,6 +276,7 @@
       </div>
     </div>
 
+    <!-- Modal Auth (Wajib Daftar) -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
@@ -304,6 +305,7 @@
       </div>
     </div>
 
+    <!-- Modal Edit Profil -->
     <div id="modal-edit-profile" class="hidden absolute inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
@@ -311,7 +313,10 @@
           <button onclick="closeEditProfileModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <form id="form-edit-profile" onsubmit="handleProfileSubmit(event)" class="space-y-3">
-          <div><input type="text" id="edit-name" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white"></div>
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Nama Pengguna / Username</label>
+            <input type="text" id="edit-name" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-xs text-white">
+          </div>
           <button type="submit" class="w-full bg-amber-400 text-black font-semibold py-2.5 rounded-lg text-xs">Simpan</button>
         </form>
       </div>
