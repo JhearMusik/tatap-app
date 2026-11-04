@@ -1,4 +1,4 @@
-// Data Video Utama (Menggunakan video yang stabil dan dapat diputar otomatis)
+// Data Video Utama
 let MOCK_VIDEOS = [
   {
     id: '1',
@@ -11,18 +11,6 @@ let MOCK_VIDEOS = [
     comments: [
       { username: '@budi_santoso', text: 'Keren banget pemandangannya!' },
       { username: '@siti_aminah', text: 'Mantap daerah Paleleh.' }
-    ]
-  },
-  {
-    id: '2',
-    username: '@nature_vibes',
-    caption: 'Pemandangan alam yang memukau untuk menemani harimu. 🌿✨ #nature',
-    music: 'Acoustic Relaxing - Studio sound',
-    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-beach-with-waves-41537-large.mp4',
-    likes_count: 852,
-    comments_count: 1,
-    comments: [
-      { username: '@rizki_99', text: 'Damai banget lihatnya.' }
     ]
   }
 ];
@@ -38,6 +26,9 @@ let currentUser = {
 };
 
 let activeVideoId = null;
+let mediaRecorder;
+let recordedChunks = [];
+let localCameraStream = null;
 
 document.addEventListener('DOMContentLoaded', () => {
   // Splash screen durasi 2 detik
@@ -61,11 +52,13 @@ function switchTab(tab) {
   const explore = document.getElementById('explore-view');
   const inbox = document.getElementById('inbox-view');
   const profile = document.getElementById('profile-view');
+  const liveRoom = document.getElementById('live-room-view');
 
   feed.classList.add('hidden');
   explore.classList.add('hidden');
   inbox.classList.add('hidden');
   profile.classList.add('hidden');
+  liveRoom.classList.add('hidden');
 
   ['feed', 'explore', 'inbox', 'profile'].forEach(t => {
     const btn = document.getElementById(`nav-btn-${t}`);
@@ -135,11 +128,7 @@ function renderFeed() {
 
     const v = item.querySelector('video');
     v.addEventListener('click', () => { 
-      if (v.paused) {
-        v.play(); 
-      } else {
-        v.pause();
-      }
+      if (v.paused) v.play(); else v.pause();
     });
     feed.appendChild(item);
   });
@@ -148,7 +137,7 @@ function renderFeed() {
   setupAutoplayObserver();
 }
 
-// Otomatis Putar Video yang Tampil di Layar
+// Autoplay Observer
 function setupAutoplayObserver() {
   const options = { threshold: 0.6 };
   const observer = new IntersectionObserver((entries) => {
@@ -156,9 +145,9 @@ function setupAutoplayObserver() {
       const video = entry.target.querySelector('video');
       if (video) {
         if (entry.isIntersecting) {
-          video.muted = false; // Aktifkan suara jika diizinkan browser
+          video.muted = false;
           video.play().catch(() => {
-            video.muted = true; // Fallback jika browser mewajibkan muted untuk autoplay
+            video.muted = true;
             video.play();
           });
         } else {
@@ -180,7 +169,148 @@ function playVisibleVideo() {
   if (firstVideo) firstVideo.play().catch(() => {});
 }
 
-// Fungsi Modal Komentar
+// ----------------- FITUR TOMBOL (+) & PEREKAMAN LANGSUNG -----------------
+function openCreateMenuModal() {
+  document.getElementById('modal-create-menu').classList.remove('hidden');
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
+function closeCreateMenuModal() {
+  document.getElementById('modal-create-menu').classList.add('hidden');
+}
+
+async function openRecordModal() {
+  closeCreateMenuModal();
+  document.getElementById('modal-record').classList.remove('hidden');
+  try {
+    localCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const webcamPreview = document.getElementById('webcam-preview');
+    webcamPreview.srcObject = localCameraStream;
+  } catch (err) {
+    alert('Gagal mengakses kamera/mikrofon: ' + err.message);
+    closeRecordModal();
+  }
+}
+
+function closeRecordModal() {
+  if (localCameraStream) {
+    localCameraStream.getTracks().forEach(track => track.stop());
+    localCameraStream = null;
+  }
+  document.getElementById('modal-record').classList.add('hidden');
+  document.getElementById('record-status').classList.add('hidden');
+  document.getElementById('btn-start-record').classList.remove('hidden');
+  document.getElementById('btn-stop-record').classList.add('hidden');
+}
+
+function startCameraRecording() {
+  recordedChunks = [];
+  try {
+    mediaRecorder = new MediaRecorder(localCameraStream, { mimeType: 'video/webm' });
+  } catch (e) {
+    mediaRecorder = new MediaRecorder(localCameraStream);
+  }
+
+  mediaRecorder.ondataavailable = (event) => {
+    if (event.data.size > 0) recordedChunks.push(event.data);
+  };
+
+  mediaRecorder.onstop = () => {
+    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+    const videoUrl = URL.createObjectURL(blob);
+    
+    // Masukkan ke data postingan baru
+    const newPost = {
+      id: Date.now().toString(),
+      username: currentUser.username,
+      caption: 'Video hasil rekaman langsung kamera 🎥 #TATAP #LiveRecord',
+      music: `Suara Asli - ${currentUser.username}`,
+      video_url: videoUrl,
+      likes_count: 0,
+      comments_count: 0,
+      comments: []
+    };
+
+    MOCK_VIDEOS.unshift(newPost);
+    renderFeed();
+    closeRecordModal();
+    switchTab('feed');
+    alert('Video rekaman berhasil disimpan dan dibagikan ke semua orang!');
+  };
+
+  mediaRecorder.start();
+  document.getElementById('record-status').classList.remove('hidden');
+  document.getElementById('btn-start-record').classList.add('hidden');
+  document.getElementById('btn-stop-record').classList.remove('hidden');
+}
+
+function stopCameraRecording() {
+  if (mediaRecorder) {
+    mediaRecorder.stop();
+  }
+}
+
+// ----------------- FITUR LIVE STREAMING & TAMU (CO-HOST) -----------------
+async function startLiveStream() {
+  closeCreateMenuModal();
+  const liveRoom = document.getElementById('live-room-view');
+  liveRoom.classList.remove('hidden');
+
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const liveVideo = document.getElementById('live-video-stream');
+    liveVideo.srcObject = stream;
+  } catch (e) {
+    alert('Gagal memulai kamera Live: ' + e.message);
+    stopLiveStream();
+  }
+}
+
+function stopLiveStream() {
+  const liveVideo = document.getElementById('live-video-stream');
+  if (liveVideo.srcObject) {
+    liveVideo.srcObject.getTracks().forEach(track => track.stop());
+    liveVideo.srcObject = null;
+  }
+  const guestVideo = document.getElementById('guest-video-element');
+  if (guestVideo.srcObject) {
+    guestVideo.srcObject.getTracks().forEach(track => track.stop());
+    guestVideo.srcObject = null;
+  }
+  document.getElementById('guest-slot-1').classList.add('hidden');
+  document.getElementById('live-room-view').classList.add('hidden');
+  switchTab('feed');
+}
+
+async function inviteGuestToLive() {
+  const guestSlot = document.getElementById('guest-slot-1');
+  guestSlot.classList.remove('hidden');
+  try {
+    // Simulasi mengundang tamu co-host (menggunakan kamera sekunder/utama)
+    const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    const guestVideoEl = document.getElementById('guest-video-element');
+    guestVideoEl.srcObject = guestStream;
+    alert('Berhasil mengundang tamu kedalam live stream!');
+  } catch (e) {
+    alert('Gagal menghubungkan tamu: ' + e.message);
+  }
+}
+
+// ----------------- FITUR KIRIM HADIAH (VIRTUAL GIFTS) -----------------
+function openGiftModal() {
+  document.getElementById('modal-gift').classList.remove('hidden');
+}
+
+function closeGiftModal() {
+  document.getElementById('modal-gift').classList.add('hidden');
+}
+
+function sendGift(giftName, coinValue) {
+  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin kepada Host & Tamu! Terima kasih atas dukungan Anda.`);
+  closeGiftModal();
+}
+
+// ----------------- KOMENTAR & UPLOAD BIASA -----------------
 function openCommentModal(videoId) {
   activeVideoId = videoId;
   const video = MOCK_VIDEOS.find(v => v.id === videoId);
@@ -190,7 +320,7 @@ function openCommentModal(videoId) {
   listContainer.innerHTML = '';
 
   if (video.comments.length === 0) {
-    listContainer.innerHTML = '<p class="text-center text-slate-500 py-4">Belum ada komentar. Jadilah yang pertama!</p>';
+    listContainer.innerHTML = '<p class="text-center text-slate-500 py-4">Belum ada komentar.</p>';
   } else {
     video.comments.forEach(c => {
       const div = document.createElement('div');
@@ -225,19 +355,13 @@ function handleAddComment(e) {
 
   const video = MOCK_VIDEOS.find(v => v.id === activeVideoId);
   if (video) {
-    video.comments.push({
-      username: currentUser.username,
-      text: text
-    });
-    const counters = document.querySelectorAll(`.comment-count-${activeVideoId}`);
-    counters.forEach(cnt => cnt.innerText = video.comments.length);
-
+    video.comments.push({ username: currentUser.username, text: text });
+    document.querySelectorAll(`.comment-count-${activeVideoId}`).forEach(cnt => cnt.innerText = video.comments.length);
     input.value = '';
     openCommentModal(activeVideoId);
   }
 }
 
-// Fungsi Modal Share
 function openShareModal(videoId) {
   activeVideoId = videoId;
   document.getElementById('modal-share').classList.remove('hidden');
@@ -255,16 +379,12 @@ function shareToSocial(platform) {
 }
 
 function copyVideoLink() {
-  const dummyLink = window.location.href;
-  navigator.clipboard.writeText(dummyLink).then(() => {
-    alert('Tautan video berhasil disalin ke clipboard!');
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    alert('Tautan video berhasil disalin!');
     closeShareModal();
-  }).catch(() => {
-    alert('Gagal menyalin tautan.');
   });
 }
 
-// Render Grid Temukan (Explore)
 function renderExploreGrid() {
   const grid = document.getElementById('explore-grid');
   if (!grid) return;
@@ -286,8 +406,8 @@ function renderExploreGrid() {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Modal Upload (Tombol +)
 function openUploadModal() {
+  closeCreateMenuModal();
   document.getElementById('modal-upload').classList.remove('hidden');
 }
 
@@ -298,8 +418,7 @@ function closeUploadModal() {
 function previewVideoFile(e) {
   const file = e.target.files[0];
   if (file) {
-    const url = URL.createObjectURL(file);
-    document.getElementById('upload-url').value = url;
+    document.getElementById('upload-url').value = URL.createObjectURL(file);
   }
 }
 
@@ -311,7 +430,7 @@ function handleUploadSubmit(e) {
 
   const newPost = {
     id: Date.now().toString(),
-    username: currentUser.username || '@kreator_tatap',
+    username: currentUser.username,
     caption: caption,
     music: audioType === 'Suara Asli' ? `Suara Asli - ${currentUser.username}` : audioType,
     video_url: videoUrl,
@@ -324,10 +443,9 @@ function handleUploadSubmit(e) {
   renderFeed();
   closeUploadModal();
   switchTab('feed');
-  alert('Postingan video Anda berhasil dipublikasikan!');
+  alert('Postingan video berhasil dipublikasikan!');
 }
 
-// Modal Edit Profil
 function openEditProfileModal() {
   document.getElementById('edit-name').value = currentUser.name || '';
   document.getElementById('edit-age').value = currentUser.age || '';
@@ -364,7 +482,6 @@ function updateProfileDisplay() {
   document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
 }
 
-// Modal Auth & Login
 function openAuthModal(mode = 'login') {
   setAuthMode(mode);
   document.getElementById('modal-auth').classList.remove('hidden');
@@ -403,18 +520,9 @@ function handleAuthSubmit(e) {
   alert('Berhasil masuk ke aplikasi TATAP!');
 }
 
-function loginWithFacebook() {
-  alert('Fitur login dengan Facebook segera aktif!');
-}
-
-function loginWithTwitter() {
-  alert('Fitur login dengan Twitter (X) segera aktif!');
-}
-
-function loginAsDemo() {
-  closeAuthModal();
-  alert('Masuk menggunakan Mode Demo.');
-}
+function loginWithFacebook() { alert('Fitur login Facebook segera aktif!'); }
+function loginWithTwitter() { alert('Fitur login Twitter segera aktif!'); }
+function loginAsDemo() { closeAuthModal(); alert('Masuk menggunakan Mode Demo.'); }
 
 function toggleLike(btn) {
   const countSpan = btn.querySelector('span');
