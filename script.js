@@ -1,7 +1,7 @@
-// Data Video & Foto Publik Global yang bisa di-scroll oleh semua user
+// Data Konten Publik (Video, Foto, dan Siaran Live yang disinkronkan untuk semua user)
 let MOCK_VIDEOS = [
   {
-    id: 'post_paleleh_1',
+    id: 'post_1',
     username: '@pengguna_tatap',
     caption: 'Video Desa Paleleh dari Ketinggian 🚁 #Buol #Paleleh #SulawesiTengah',
     music: 'Suara Asli - @pengguna_tatap',
@@ -12,9 +12,9 @@ let MOCK_VIDEOS = [
     comments: []
   },
   {
-    id: 'post_kreator_2',
+    id: 'post_2',
     username: '@kreator_tatap',
-    caption: 'Pemandangan alam indah di wilayah Buol ✨ #TATAP',
+    caption: 'Pemandangan pantai yang indah di wilayah Buol ✨ #TATAP',
     music: 'Musik Hits - TATAP Studio',
     type: 'video',
     media_url: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-beach-with-waves-41537-large.mp4',
@@ -26,6 +26,9 @@ let MOCK_VIDEOS = [
     ]
   }
 ];
+
+// Daftar siaran langsung (live) yang aktif dari semua pengguna
+let ACTIVE_LIVES = [];
 
 let authMode = 'register';
 let currentUser = null;
@@ -45,15 +48,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
-  // Memuat postingan publik & mewajibkan daftar
   renderFeed();
+  renderActiveLives();
   openAuthModal('register');
 });
 
 // Switch Tab Beranda, Temukan, Kotak Masuk, Profil
 function switchTab(tab) {
   if (!currentUser) {
-    alert('Silakan mendaftar atau masuk terlebih dahulu untuk menggunakan fitur ini!');
+    alert('Silakan mendaftar atau masuk terlebih dahulu!');
     openAuthModal('register');
     return;
   }
@@ -78,6 +81,7 @@ function switchTab(tab) {
   if (tab === 'explore') {
     explore.classList.remove('hidden');
     renderExploreGrid();
+    renderActiveLives();
     document.getElementById('nav-btn-explore').className = 'flex flex-col items-center text-amber-400 font-medium';
     pauseAllVideos();
   } else if (tab === 'inbox') {
@@ -97,7 +101,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Feed Publik: Mendukung Foto, Video, & Siaran Langsung (Bisa di-scroll semua orang)
+// Render Feed Publik: Menampilkan foto, video, & banner siaran live yang bisa di-scroll semua user
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -110,15 +114,23 @@ function renderFeed() {
     let mediaElement = '';
     if (itemData.type === 'image') {
       mediaElement = `<img src="${itemData.media_url}" class="w-full h-full object-cover">`;
+    } else if (itemData.type === 'live') {
+      mediaElement = `
+        <div class="w-full h-full bg-gradient-to-tr from-slate-900 to-red-950 flex flex-col items-center justify-center p-6 text-center">
+          <div class="w-20 h-20 rounded-full bg-red-600/30 flex items-center justify-center animate-pulse mb-4 border-2 border-red-500">
+            <i data-lucide="radio" class="w-10 h-10 text-red-500"></i>
+          </div>
+          <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full mb-2 animate-bounce">🔴 SEDANG LIVE</span>
+          <h3 class="font-bold text-lg text-white">${itemData.username}</h3>
+          <p class="text-xs text-slate-300 mt-1">${itemData.caption}</p>
+          <button onclick="joinLiveStream('${itemData.id}')" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-2.5 rounded-full text-xs shadow-lg transition">
+            Gabung Siaran Live Sekarang
+          </button>
+        </div>
+      `;
     } else {
-      // Menambahkan muted & playsinline agar video tidak blank hitam karena browser autoplay policy
       mediaElement = `
         <video class="w-full h-full object-cover cursor-pointer" loop playsinline muted src="${itemData.media_url}"></video>
-        <div class="play-overlay absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity">
-          <div class="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center">
-            <i data-lucide="play" class="w-8 h-8 text-white fill-white ml-1"></i>
-          </div>
-        </div>
       `;
     }
 
@@ -150,12 +162,11 @@ function renderFeed() {
       </div>
     `;
 
-    // Kontrol klik untuk play/pause video secara instan
-    if (itemData.type !== 'image') {
+    if (itemData.type === 'video') {
       const v = card.querySelector('video');
       card.addEventListener('click', () => { 
         if (v.paused) {
-          v.muted = false; // Aktifkan suara saat diklik oleh user
+          v.muted = false;
           v.play().catch(() => {});
         } else {
           v.pause();
@@ -168,6 +179,33 @@ function renderFeed() {
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
   setupAutoplayObserver();
+}
+
+// Render daftar pengguna yang sedang live di menu Temukan (Explore)
+function renderActiveLives() {
+  const container = document.getElementById('active-live-list');
+  if (!container) return;
+
+  if (ACTIVE_LIVES.length === 0) {
+    container.innerHTML = `<p class="text-[11px] text-slate-400 italic">Belum ada siaran langsung aktif.</p>`;
+    return;
+  }
+
+  container.innerHTML = '';
+  ACTIVE_LIVES.forEach(live => {
+    const badge = document.createElement('div');
+    badge.className = 'flex flex-col items-center space-y-1 cursor-pointer shrink-0';
+    badge.innerHTML = `
+      <div class="w-14 h-14 rounded-full p-0.5 bg-gradient-to-tr from-red-600 to-amber-400 animate-pulse">
+        <div class="w-full h-full bg-slate-900 rounded-full flex items-center justify-center font-bold text-xs text-amber-400">
+          ${live.username.charAt(1).toUpperCase()}
+        </div>
+      </div>
+      <span class="text-[10px] text-slate-200 truncate max-w-[60px]">${live.username}</span>
+    `;
+    badge.addEventListener('click', () => startLiveStream(live));
+    container.appendChild(badge);
+  });
 }
 
 function setupAutoplayObserver() {
@@ -206,7 +244,7 @@ function playVisibleVideo() {
   }
 }
 
-// ----------------- MENAMBAH KONTEN BARU (FOTO / VIDEO / LIVE) -----------------
+// ----------------- KONTROL KONTEN PUBLIK (+) -----------------
 function openCreateMenuModal() {
   if (!currentUser) {
     alert('Silakan daftar atau masuk terlebih dahulu!');
@@ -260,11 +298,11 @@ function startCameraRecording() {
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const videoUrl = URL.createObjectURL(blob);
     
-    // Tambahkan video baru ke daftar publik
+    // Masukkan ke MOCK_VIDEOS agar otomatis bisa dilihat & di-scroll semua user
     const newPost = {
       id: Date.now().toString(),
       username: currentUser.username,
-      caption: 'Rekaman kamera langsung 🎥 #TATAP #LiveRecord',
+      caption: 'Video rekaman langsung kamera 🎥 #TATAP',
       music: `Suara Asli - ${currentUser.username}`,
       type: 'video',
       media_url: videoUrl,
@@ -277,7 +315,7 @@ function startCameraRecording() {
     renderFeed();
     closeRecordModal();
     switchTab('feed');
-    alert('Video rekaman berhasil dipublikasikan untuk semua pengguna!');
+    alert('Video rekaman berhasil dibagikan dan dapat dilihat oleh seluruh pengguna!');
   };
 
   mediaRecorder.start();
@@ -290,14 +328,27 @@ function stopCameraRecording() {
   if (mediaRecorder) mediaRecorder.stop();
 }
 
-async function startLiveStream() {
+// Memulai atau Bergabung ke Siaran Langsung (Live) Publik
+async function startLiveStream(existingLive = null) {
   closeCreateMenuModal();
   document.getElementById('live-room-view').classList.remove('hidden');
+
+  if (!existingLive && currentUser) {
+    // Daftarkan ke daftar siaran aktif agar terlihat oleh user lain di tab Temukan
+    const liveObj = {
+      id: 'live_' + Date.now(),
+      username: currentUser.username,
+      caption: 'Sedang Siaran Langsung Bersama Komunitas TATAP 🔴'
+    };
+    ACTIVE_LIVES.push(liveObj);
+    document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
+  }
+
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById('live-video-stream').srcObject = stream;
   } catch (e) {
-    alert('Gagal memulai Kamera Live: ' + e.message);
+    alert('Gagal mengaktifkan kamera Live: ' + e.message);
     stopLiveStream();
   }
 }
@@ -308,6 +359,7 @@ function stopLiveStream() {
     liveVideo.srcObject.getTracks().forEach(track => track.stop());
     liveVideo.srcObject = null;
   }
+  ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
   document.getElementById('guest-slot-1').classList.add('hidden');
   document.getElementById('live-room-view').classList.add('hidden');
   switchTab('feed');
@@ -318,7 +370,7 @@ async function inviteGuestToLive() {
   try {
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById('guest-video-element').srcObject = guestStream;
-    alert('Berhasil mengundang tamu kedalam siaran langsung!');
+    alert('Berhasil mengundang tamu co-host ke dalam siaran langsung!');
   } catch (e) {
     alert('Gagal mengundang tamu: ' + e.message);
   }
@@ -327,7 +379,7 @@ async function inviteGuestToLive() {
 function openGiftModal() { document.getElementById('modal-gift').classList.remove('hidden'); }
 function closeGiftModal() { document.getElementById('modal-gift').classList.add('hidden'); }
 function sendGift(giftName, coinValue) {
-  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin!`);
+  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin kepada host dan tamu live!`);
   closeGiftModal();
 }
 
@@ -358,7 +410,7 @@ function handleUploadSubmit(e) {
   const caption = document.getElementById('upload-caption').value;
   const mediaUrl = document.getElementById('upload-url').value || 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4';
 
-  // Menyimpan konten baru ke feed publik
+  // Tambahkan unggahan (foto/video) ke MOCK_VIDEOS publik agar bisa dilihat & di-scroll semua pengguna
   const newPost = {
     id: Date.now().toString(),
     username: currentUser ? currentUser.username : '@pengguna_tatap',
@@ -375,10 +427,10 @@ function handleUploadSubmit(e) {
   renderFeed();
   closeUploadModal();
   switchTab('feed');
-  alert('Konten berhasil dipublikasikan dan dapat di-scroll oleh seluruh pengguna TATAP!');
+  alert('Konten berhasil dibagikan dan kini bisa dilihat serta di-scroll oleh seluruh pengguna TATAP!');
 }
 
-// ----------------- FITUR LAINNYA -----------------
+// ----------------- FITUR PENDUKUNG -----------------
 function openCommentModal(videoId) {
   if (!currentUser) { alert('Silakan mendaftar terlebih dahulu!'); openAuthModal('register'); return; }
   activeVideoId = videoId;
@@ -423,8 +475,8 @@ function handleAddComment(e) {
 
 function openShareModal(videoId) { activeVideoId = videoId; document.getElementById('modal-share').classList.remove('hidden'); try { if (window.lucide) lucide.createIcons(); } catch (e) {} }
 function closeShareModal() { document.getElementById('modal-share').classList.add('hidden'); activeVideoId = null; }
-function shareToSocial(platform) { alert(`Berhasil membagikan ke ${platform}!`); closeShareModal(); }
-function copyVideoLink() { navigator.clipboard.writeText(window.location.href).then(() => { alert('Link disalin!'); closeShareModal(); }); }
+function shareToSocial(platform) { alert(`Berhasil membagikan tautan ke ${platform}!`); closeShareModal(); }
+function copyVideoLink() { navigator.clipboard.writeText(window.location.href).then(() => { alert('Link berhasil disalin!'); closeShareModal(); }); }
 
 function renderExploreGrid() {
   const grid = document.getElementById('explore-grid');
