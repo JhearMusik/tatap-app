@@ -2,14 +2,16 @@
 let MOCK_VIDEOS = [
   {
     id: 'post_1',
-    username: '@pengguna_tatap',
-    caption: 'Video Desa Paleleh dari Ketinggian 🚁 #Buol #Paleleh #SulawesiTengah',
-    music: 'Suara Asli - @pengguna_tatap',
+    username: '@agus123',
+    caption: 'Video sambutan dari @agus123 #TATAP #Buol',
+    music: 'Suara Asli - @agus123',
     type: 'video',
     media_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
-    likes_count: 1,
-    comments_count: 0,
-    comments: []
+    likes_count: 15,
+    comments_count: 1,
+    comments: [
+      { username: '@kreator_tatap', text: 'Halo @agus123, selamat bergabung!' }
+    ]
   },
   {
     id: 'post_2',
@@ -21,13 +23,11 @@ let MOCK_VIDEOS = [
     likes_count: 1240,
     comments_count: 2,
     comments: [
-      { username: '@budi_santoso', text: 'Keren banget pemandangannya!' },
-      { username: '@siti_aminah', text: 'Mantap daerah Paleleh.' }
+      { username: '@budi_santoso', text: 'Keren banget pemandangannya!' }
     ]
   }
 ];
 
-// Daftar siaran langsung (live) yang aktif dari semua pengguna
 let ACTIVE_LIVES = [];
 
 let authMode = 'register';
@@ -50,6 +50,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderFeed();
   renderActiveLives();
+  renderExploreGrid();
+
+  // Listener untuk pencarian real-time di menu Temukan (Mendukung pencarian nama user seperti @agus123)
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase().trim();
+      renderExploreGrid(keyword);
+    });
+  }
+
+  // Wajib daftar/masuk saat pertama kali buka aplikasi
   openAuthModal('register');
 });
 
@@ -101,7 +113,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Feed Publik: Menampilkan foto, video, & banner siaran live yang bisa di-scroll semua user
+// Render Feed Publik
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -123,7 +135,7 @@ function renderFeed() {
           <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full mb-2 animate-bounce">🔴 SEDANG LIVE</span>
           <h3 class="font-bold text-lg text-white">${itemData.username}</h3>
           <p class="text-xs text-slate-300 mt-1">${itemData.caption}</p>
-          <button onclick="joinLiveStream('${itemData.id}')" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-2.5 rounded-full text-xs shadow-lg transition">
+          <button onclick="startLiveStream()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-2.5 rounded-full text-xs shadow-lg transition">
             Gabung Siaran Live Sekarang
           </button>
         </div>
@@ -181,7 +193,6 @@ function renderFeed() {
   setupAutoplayObserver();
 }
 
-// Render daftar pengguna yang sedang live di menu Temukan (Explore)
 function renderActiveLives() {
   const container = document.getElementById('active-live-list');
   if (!container) return;
@@ -203,7 +214,7 @@ function renderActiveLives() {
       </div>
       <span class="text-[10px] text-slate-200 truncate max-w-[60px]">${live.username}</span>
     `;
-    badge.addEventListener('click', () => startLiveStream(live));
+    badge.addEventListener('click', () => startLiveStream());
     container.appendChild(badge);
   });
 }
@@ -298,11 +309,10 @@ function startCameraRecording() {
     const blob = new Blob(recordedChunks, { type: 'video/webm' });
     const videoUrl = URL.createObjectURL(blob);
     
-    // Masukkan ke MOCK_VIDEOS agar otomatis bisa dilihat & di-scroll semua user
     const newPost = {
       id: Date.now().toString(),
       username: currentUser.username,
-      caption: 'Video rekaman langsung kamera 🎥 #TATAP',
+      caption: `Video rekaman oleh ${currentUser.username} 🎥 #TATAP`,
       music: `Suara Asli - ${currentUser.username}`,
       type: 'video',
       media_url: videoUrl,
@@ -313,9 +323,10 @@ function startCameraRecording() {
 
     MOCK_VIDEOS.unshift(newPost);
     renderFeed();
+    renderExploreGrid();
     closeRecordModal();
     switchTab('feed');
-    alert('Video rekaman berhasil dibagikan dan dapat dilihat oleh seluruh pengguna!');
+    alert('Video rekaman berhasil dibagikan untuk semua pengguna!');
   };
 
   mediaRecorder.start();
@@ -328,19 +339,16 @@ function stopCameraRecording() {
   if (mediaRecorder) mediaRecorder.stop();
 }
 
-// Memulai atau Bergabung ke Siaran Langsung (Live) Publik
-async function startLiveStream(existingLive = null) {
+async function startLiveStream() {
   closeCreateMenuModal();
   document.getElementById('live-room-view').classList.remove('hidden');
 
-  if (!existingLive && currentUser) {
-    // Daftarkan ke daftar siaran aktif agar terlihat oleh user lain di tab Temukan
-    const liveObj = {
+  if (currentUser && !ACTIVE_LIVES.some(l => l.username === currentUser.username)) {
+    ACTIVE_LIVES.push({
       id: 'live_' + Date.now(),
       username: currentUser.username,
-      caption: 'Sedang Siaran Langsung Bersama Komunitas TATAP 🔴'
-    };
-    ACTIVE_LIVES.push(liveObj);
+      caption: 'Sedang Siaran Langsung 🔴'
+    });
     document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
   }
 
@@ -359,10 +367,13 @@ function stopLiveStream() {
     liveVideo.srcObject.getTracks().forEach(track => track.stop());
     liveVideo.srcObject = null;
   }
-  ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
+  if (currentUser) {
+    ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
+  }
   document.getElementById('guest-slot-1').classList.add('hidden');
   document.getElementById('live-room-view').classList.add('hidden');
   switchTab('feed');
+  renderActiveLives();
 }
 
 async function inviteGuestToLive() {
@@ -370,7 +381,7 @@ async function inviteGuestToLive() {
   try {
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById('guest-video-element').srcObject = guestStream;
-    alert('Berhasil mengundang tamu co-host ke dalam siaran langsung!');
+    alert('Berhasil mengundang tamu co-host!');
   } catch (e) {
     alert('Gagal mengundang tamu: ' + e.message);
   }
@@ -379,7 +390,7 @@ async function inviteGuestToLive() {
 function openGiftModal() { document.getElementById('modal-gift').classList.remove('hidden'); }
 function closeGiftModal() { document.getElementById('modal-gift').classList.add('hidden'); }
 function sendGift(giftName, coinValue) {
-  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin kepada host dan tamu live!`);
+  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin!`);
   closeGiftModal();
 }
 
@@ -410,7 +421,6 @@ function handleUploadSubmit(e) {
   const caption = document.getElementById('upload-caption').value;
   const mediaUrl = document.getElementById('upload-url').value || 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4';
 
-  // Tambahkan unggahan (foto/video) ke MOCK_VIDEOS publik agar bisa dilihat & di-scroll semua pengguna
   const newPost = {
     id: Date.now().toString(),
     username: currentUser ? currentUser.username : '@pengguna_tatap',
@@ -425,12 +435,49 @@ function handleUploadSubmit(e) {
 
   MOCK_VIDEOS.unshift(newPost);
   renderFeed();
+  renderExploreGrid();
   closeUploadModal();
   switchTab('feed');
-  alert('Konten berhasil dibagikan dan kini bisa dilihat serta di-scroll oleh seluruh pengguna TATAP!');
+  alert('Konten berhasil dibagikan dan kini bisa dilihat di beranda publik!');
 }
 
-// ----------------- FITUR PENDUKUNG -----------------
+// ----------------- FITUR PENCARIAN & PENDUKUNG -----------------
+function renderExploreGrid(filterKeyword = '') {
+  const grid = document.getElementById('explore-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const filteredVideos = MOCK_VIDEOS.filter(video => {
+    return video.username.toLowerCase().includes(filterKeyword) || 
+           video.caption.toLowerCase().includes(filterKeyword);
+  });
+
+  if (filteredVideos.length === 0) {
+    grid.innerHTML = `<p class="col-span-2 text-center text-xs text-slate-400 py-4">Pencarian tidak ditemukan.</p>`;
+    return;
+  }
+
+  filteredVideos.forEach((video) => {
+    const card = document.createElement('div');
+    card.className = 'relative bg-slate-800 rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border border-slate-700/50';
+    
+    let content = video.type === 'image' 
+      ? `<img class="w-full h-full object-cover" src="${video.media_url}">` 
+      : `<video class="w-full h-full object-cover" src="${video.media_url}"></video>`;
+      
+    card.innerHTML = `
+      ${content}
+      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2 text-xs">
+        <span class="font-bold text-amber-400 truncate">${video.username}</span>
+        <span class="text-[10px] text-slate-300 truncate">${video.caption}</span>
+      </div>
+    `;
+    card.addEventListener('click', () => switchTab('feed'));
+    grid.appendChild(card);
+  });
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
 function openCommentModal(videoId) {
   if (!currentUser) { alert('Silakan mendaftar terlebih dahulu!'); openAuthModal('register'); return; }
   activeVideoId = videoId;
@@ -478,34 +525,8 @@ function closeShareModal() { document.getElementById('modal-share').classList.ad
 function shareToSocial(platform) { alert(`Berhasil membagikan tautan ke ${platform}!`); closeShareModal(); }
 function copyVideoLink() { navigator.clipboard.writeText(window.location.href).then(() => { alert('Link berhasil disalin!'); closeShareModal(); }); }
 
-function renderExploreGrid() {
-  const grid = document.getElementById('explore-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-
-  MOCK_VIDEOS.forEach((video) => {
-    const card = document.createElement('div');
-    card.className = 'relative bg-slate-800 rounded-xl overflow-hidden aspect-[3/4] cursor-pointer border border-slate-700/50';
-    
-    let content = video.type === 'image' 
-      ? `<img class="w-full h-full object-cover" src="${video.media_url}">` 
-      : `<video class="w-full h-full object-cover" src="${video.media_url}"></video>`;
-      
-    card.innerHTML = `
-      ${content}
-      <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2 text-xs">
-        <span class="font-bold text-amber-400 truncate">${video.username}</span>
-        <span class="text-[10px] text-slate-300 truncate">${video.caption}</span>
-      </div>
-    `;
-    card.addEventListener('click', () => switchTab('feed'));
-    grid.appendChild(card);
-  });
-  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
-}
-
 function openEditProfileModal() {
-  document.getElementById('edit-name').value = currentUser.name || '';
+  document.getElementById('edit-name').value = currentUser ? currentUser.name : '';
   document.getElementById('modal-edit-profile').classList.remove('hidden');
 }
 function closeEditProfileModal() { document.getElementById('modal-edit-profile').classList.add('hidden'); }
@@ -569,7 +590,7 @@ function handleAuthSubmit(e) {
     alert('Pendaftaran berhasil! Selamat datang di TATAP.');
   } else {
     currentUser = {
-      username: '@pengguna_tatap',
+      username: '@' + email.split('@')[0],
       name: email.split('@')[0],
       status: 'Senang bisa kembali ✨'
     };
@@ -578,6 +599,7 @@ function handleAuthSubmit(e) {
 
   updateProfileDisplay();
   renderFeed();
+  renderExploreGrid();
   document.getElementById('btn-close-auth').classList.remove('hidden');
   document.getElementById('modal-auth').classList.add('hidden');
 }
