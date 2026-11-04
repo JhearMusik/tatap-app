@@ -1,4 +1,4 @@
-// Data Konten Publik (Video, Foto, dan Siaran Live yang dapat di-scroll semua pengguna)
+// Data Konten Publik (Video, Foto, dan Siaran Live yang dapat di-scroll bersamaan)
 let MOCK_VIDEOS = [
   {
     id: 'post_1',
@@ -36,7 +36,6 @@ let localCameraStream = null;
 
 // Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
-  // Menghilangkan splash screen secara mulus setelah 1.8 detik
   setTimeout(() => {
     const splash = document.getElementById('splash-screen');
     if (splash) {
@@ -45,15 +44,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }, 1800);
 
-  // Inisialisasi ikon Lucide
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
-  // Render konten awal
   renderFeed();
   renderActiveLives();
   renderExploreGrid();
 
-  // Listener untuk kolom pencarian real-time di menu Temukan (Mendukung pencarian @agus123)
   const searchInput = document.getElementById('search-input');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
@@ -62,11 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Wajib daftar/masuk saat pertama kali membuka aplikasi
   openAuthModal('register');
 });
 
-// Fungsi Berpindah Tab (Beranda, Temukan, Kotak Masuk, Profil)
+// Fungsi Berpindah Tab
 function switchTab(tab) {
   if (!currentUser) {
     alert('Silakan mendaftar atau masuk terlebih dahulu!');
@@ -114,7 +109,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Beranda Utama (Feed Publik)
+// Render Beranda Utama (Feed Publik dengan Dukungan Live Streaming interaktif saat di-scroll)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -128,17 +123,31 @@ function renderFeed() {
     if (itemData.type === 'image') {
       mediaElement = `<img src="${itemData.media_url}" class="w-full h-full object-cover">`;
     } else if (itemData.type === 'live') {
+      // Jika tipe konten adalah live, tampilkan kartu siaran langsung interaktif di dalam feed scroll
       mediaElement = `
-        <div class="w-full h-full bg-gradient-to-tr from-slate-950 via-red-950 to-black flex flex-col items-center justify-center p-6 text-center">
-          <div class="w-20 h-20 rounded-full bg-red-600/30 flex items-center justify-center animate-pulse mb-4 border-2 border-red-500 shadow-2xl">
-            <i data-lucide="radio" class="w-10 h-10 text-red-500"></i>
+        <div class="relative w-full h-full bg-slate-950 flex flex-col justify-between p-4 pt-16 pb-20">
+          <div class="absolute inset-0 z-0">
+            <video id="feed-live-video-${itemData.id}" class="w-full h-full object-cover" autoplay playsinline muted></video>
+            <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
           </div>
-          <span class="bg-red-600 text-white font-bold text-xs px-3 py-1 rounded-full mb-3 animate-bounce">🔴 SEDANG SIARAN LANGSUNG</span>
-          <h3 class="font-bold text-xl text-white">${itemData.username}</h3>
-          <p class="text-xs text-slate-300 mt-1 max-w-xs">${itemData.caption}</p>
-          <button onclick="startLiveStream()" class="mt-6 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-3 rounded-full text-xs shadow-xl transition transform hover:scale-105">
-            Gabung ke Live Sekarang
-          </button>
+          <div class="relative z-10 flex justify-between items-center">
+            <div class="flex items-center space-x-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/30">
+              <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
+              <span class="text-xs font-bold text-red-400">SIARAN LANGSUNG PUBLIK</span>
+            </div>
+          </div>
+          <div class="relative z-10 my-auto flex flex-col items-center justify-center text-center space-y-2">
+            <div class="w-20 h-20 rounded-full border-2 border-amber-400 bg-slate-900 flex items-center justify-center font-bold text-2xl text-amber-400 shadow-2xl">
+              ${itemData.username.charAt(1).toUpperCase()}
+            </div>
+            <h3 class="font-bold text-lg text-white">Host (${itemData.username})</h3>
+            <p class="text-xs text-slate-300">${itemData.caption}</p>
+          </div>
+          <div class="relative z-10 flex gap-2 justify-center">
+            <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+              <i data-lucide="gift" class="w-4 h-4"></i> Kirim Hadiah
+            </button>
+          </div>
         </div>
       `;
     } else {
@@ -152,6 +161,7 @@ function renderFeed() {
     card.innerHTML = `
       ${mediaElement}
       
+      ${itemData.type !== 'live' ? `
       <div class="absolute bottom-14 left-4 right-16 z-20 space-y-2 pointer-events-none">
         <h4 class="font-bold text-base drop-shadow">${itemData.username}</h4>
         <p class="text-xs text-slate-200 line-clamp-2 drop-shadow">${itemData.caption}</p>
@@ -174,7 +184,7 @@ function renderFeed() {
           <i data-lucide="share-2" class="w-7 h-7"></i>
           <span class="text-xs mt-1 font-semibold">Bagi</span>
         </button>
-      </div>
+      </div>` : ''}
     `;
 
     if (itemData.type === 'video') {
@@ -187,6 +197,14 @@ function renderFeed() {
           v.pause();
         }
       });
+    } else if (itemData.type === 'live' && localCameraStream) {
+      // Hubungkan stream kamera aktif ke elemen video live di feed
+      setTimeout(() => {
+        const liveVideoEl = document.getElementById(`feed-live-video-${itemData.id}`);
+        if (liveVideoEl && !liveVideoEl.srcObject) {
+          liveVideoEl.srcObject = localCameraStream;
+        }
+      }, 100);
     }
 
     feed.appendChild(card);
@@ -333,7 +351,7 @@ function startCameraRecording() {
   };
 
   mediaRecorder.start();
-  document.getElementById('record-status').classList.remove('hidden');
+  document.getElementById('record-status').classList.add('hidden');
   document.getElementById('btn-start-record').classList.add('hidden');
   document.getElementById('btn-stop-record').classList.remove('hidden');
 }
@@ -346,35 +364,36 @@ async function startLiveStream() {
   closeCreateMenuModal();
   document.getElementById('live-room-view').classList.remove('hidden');
 
-  if (currentUser) {
-    const liveObj = {
-      id: 'live_' + currentUser.username,
-      username: currentUser.username,
-      caption: 'Sedang Siaran Langsung 🔴'
-    };
-    if (!ACTIVE_LIVES.some(l => l.username === currentUser.username)) {
-      ACTIVE_LIVES.push(liveObj);
-    }
-    if (!MOCK_VIDEOS.some(v => v.id === liveObj.id)) {
-      MOCK_VIDEOS.unshift({
-        id: liveObj.id,
-        username: currentUser.username,
-        caption: `Siaran langsung interaktif oleh ${currentUser.username}`,
-        music: 'Live Audio',
-        type: 'live',
-        likes_count: 0,
-        comments: []
-      });
-    }
-    document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
-  }
-
-  renderFeed();
-  renderActiveLives();
-
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    document.getElementById('live-video-stream').srcObject = stream;
+    localCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    document.getElementById('live-video-stream').srcObject = localCameraStream;
+
+    if (currentUser) {
+      const liveId = 'live_' + currentUser.username;
+      if (!ACTIVE_LIVES.some(l => l.username === currentUser.username)) {
+        ACTIVE_LIVES.push({
+          id: liveId,
+          username: currentUser.username,
+          caption: 'Sedang Siaran Langsung 🔴'
+        });
+      }
+      // Masukkan ke MOCK_VIDEOS agar otomatis bisa di-scroll di beranda utama bersama video lain
+      if (!MOCK_VIDEOS.some(v => v.id === liveId)) {
+        MOCK_VIDEOS.unshift({
+          id: liveId,
+          username: currentUser.username,
+          caption: `Siaran langsung interaktif oleh ${currentUser.username}`,
+          music: 'Live Audio',
+          type: 'live',
+          likes_count: 0,
+          comments: []
+        });
+      }
+      document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
+    }
+
+    renderFeed();
+    renderActiveLives();
   } catch (e) {
     alert('Gagal mengaktifkan kamera Live: ' + e.message);
     stopLiveStream();
@@ -382,11 +401,6 @@ async function startLiveStream() {
 }
 
 function stopLiveStream() {
-  const liveVideo = document.getElementById('live-video-stream');
-  if (liveVideo.srcObject) {
-    liveVideo.srcObject.getTracks().forEach(track => track.stop());
-    liveVideo.srcObject = null;
-  }
   if (currentUser) {
     ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
     MOCK_VIDEOS = MOCK_VIDEOS.filter(v => v.type !== 'live' || v.username !== currentUser.username);
