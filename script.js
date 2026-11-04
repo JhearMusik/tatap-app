@@ -1,13 +1,13 @@
-// Data Video Utama
+// Data Video Utama (Menggunakan video yang stabil dan dapat diputar otomatis)
 let MOCK_VIDEOS = [
   {
     id: '1',
     username: '@kreator_tatap',
     caption: 'Video Paleleh dari Ketinggian 🚁 #Buol #Paleleh',
     music: 'Musik Hits - TATAP Studio',
-    video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4',
     likes_count: 1240,
-    comments_count: 89,
+    comments_count: 2,
     comments: [
       { username: '@budi_santoso', text: 'Keren banget pemandangannya!' },
       { username: '@siti_aminah', text: 'Mantap daerah Paleleh.' }
@@ -18,9 +18,9 @@ let MOCK_VIDEOS = [
     username: '@nature_vibes',
     caption: 'Pemandangan alam yang memukau untuk menemani harimu. 🌿✨ #nature',
     music: 'Acoustic Relaxing - Studio sound',
-    video_url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+    video_url: 'https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-beach-with-waves-41537-large.mp4',
     likes_count: 852,
-    comments_count: 34,
+    comments_count: 1,
     comments: [
       { username: '@rizki_99', text: 'Damai banget lihatnya.' }
     ]
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
   renderFeed();
   updateProfileDisplay();
+  setupAutoplayObserver();
 });
 
 // Switch Tab Beranda, Temukan, Kotak Masuk, Profil
@@ -77,15 +78,19 @@ function switchTab(tab) {
     explore.classList.remove('hidden');
     renderExploreGrid();
     document.getElementById('nav-btn-explore').className = 'flex flex-col items-center text-amber-400 font-medium';
+    pauseAllVideos();
   } else if (tab === 'inbox') {
     inbox.classList.remove('hidden');
     document.getElementById('nav-btn-inbox').className = 'flex flex-col items-center text-amber-400 font-medium';
+    pauseAllVideos();
   } else if (tab === 'profile') {
     profile.classList.remove('hidden');
     document.getElementById('nav-btn-profile').className = 'flex flex-col items-center text-amber-400 font-medium';
+    pauseAllVideos();
   } else {
     feed.classList.remove('hidden');
     document.getElementById('nav-btn-feed').className = 'flex flex-col items-center text-amber-400 font-medium';
+    playVisibleVideo();
   }
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
@@ -99,9 +104,9 @@ function renderFeed() {
 
   MOCK_VIDEOS.forEach((video) => {
     const item = document.createElement('div');
-    item.className = 'snap-start relative w-full h-full flex items-center justify-center bg-black';
+    item.className = 'snap-start relative w-full h-full flex items-center justify-center bg-black video-card';
     item.innerHTML = `
-      <video class="w-full h-full object-cover cursor-pointer" loop playsinline src="${video.video_url}"></video>
+      <video class="w-full h-full object-cover cursor-pointer" loop playsinline muted src="${video.video_url}"></video>
       
       <div class="absolute bottom-14 left-4 right-16 z-20 space-y-2 pointer-events-none">
         <h4 class="font-bold text-base drop-shadow">${video.username}</h4>
@@ -129,11 +134,50 @@ function renderFeed() {
     `;
 
     const v = item.querySelector('video');
-    v.addEventListener('click', () => { if (v.paused) v.play(); else v.pause(); });
+    v.addEventListener('click', () => { 
+      if (v.paused) {
+        v.play(); 
+      } else {
+        v.pause();
+      }
+    });
     feed.appendChild(item);
   });
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+  setupAutoplayObserver();
+}
+
+// Otomatis Putar Video yang Tampil di Layar
+function setupAutoplayObserver() {
+  const options = { threshold: 0.6 };
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const video = entry.target.querySelector('video');
+      if (video) {
+        if (entry.isIntersecting) {
+          video.muted = false; // Aktifkan suara jika diizinkan browser
+          video.play().catch(() => {
+            video.muted = true; // Fallback jika browser mewajibkan muted untuk autoplay
+            video.play();
+          });
+        } else {
+          video.pause();
+        }
+      }
+    });
+  }, options);
+
+  document.querySelectorAll('.video-card').forEach(card => observer.observe(card));
+}
+
+function pauseAllVideos() {
+  document.querySelectorAll('video').forEach(v => v.pause());
+}
+
+function playVisibleVideo() {
+  const firstVideo = document.querySelector('.video-card video');
+  if (firstVideo) firstVideo.play().catch(() => {});
 }
 
 // Fungsi Modal Komentar
@@ -263,7 +307,7 @@ function handleUploadSubmit(e) {
   e.preventDefault();
   const caption = document.getElementById('upload-caption').value;
   const audioType = document.getElementById('upload-audio-type').value;
-  const videoUrl = document.getElementById('upload-url').value || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+  const videoUrl = document.getElementById('upload-url').value || 'https://assets.mixkit.co/videos/preview/mixkit-tree-with-yellow-flowers-1173-large.mp4';
 
   const newPost = {
     id: Date.now().toString(),
