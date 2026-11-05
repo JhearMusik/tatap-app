@@ -96,6 +96,7 @@
 
         <div class="w-full bg-slate-800 rounded-xl p-4 text-left text-xs space-y-2 border border-slate-700 mt-2">
           <p><span class="text-slate-400">Status Akun:</span> <strong class="text-emerald-400">Aktif & Terhubung Publik</strong></p>
+          <p><span class="text-slate-400">Saldo Koin:</span> <strong id="profile-coin-count" class="text-amber-400">🪙 100 Koin</strong></p>
         </div>
 
         <button onclick="openEditProfileModal()" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white font-semibold py-2 rounded-xl text-xs transition">Edit Profil</button>
@@ -237,7 +238,6 @@
           <button onclick="closeGiftModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
 
-        <!-- Tombol Beli Koin / Top Up -->
         <div class="bg-slate-800/80 p-3 rounded-2xl flex items-center justify-between border border-slate-700">
           <div class="text-xs">
             <p class="font-bold text-white">Butuh tambahan koin?</p>
@@ -248,7 +248,6 @@
           </button>
         </div>
 
-        <!-- Daftar Hadiah -->
         <div>
           <p class="text-xs font-bold text-slate-300 mb-2">Pilih Hadiah</p>
           <div class="grid grid-cols-3 gap-3 text-center text-xs">
@@ -327,12 +326,12 @@
       </div>
     </div>
 
-    <!-- Modal Auth (Muncul Saat Tombol Profil / Masuk Ditekan) -->
+    <!-- Modal Auth -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
           <h3 id="auth-title" class="text-lg font-bold text-amber-400">Daftar Akun TATAP</h3>
-          <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white hidden"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Daftar</button>
