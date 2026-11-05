@@ -54,14 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   if (splashVideo) {
-    // Hilangkan splash screen secara mulus setelah video selesai berputar
     splashVideo.onended = window.hideSplash;
     splashVideo.play().catch(() => {
       setTimeout(window.hideSplash, 1500);
     });
   }
 
-  // Fallback pengaman otomatis setelah 10 detik (sesuai durasi video tatap.mp4)
   setTimeout(window.hideSplash, 10500);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
@@ -87,7 +85,6 @@ function switchTab(tab) {
   const profile = document.getElementById('profile-view');
   const liveRoom = document.getElementById('live-room-view');
 
-  // Jika belum login dan menekan tombol profil/inbox, tampilkan modal auth
   if ((tab === 'profile' || tab === 'inbox') && !currentUser) {
     openAuthModal('register');
     return;
@@ -127,7 +124,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif)
+// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif ala Gambar 1)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -159,6 +156,7 @@ function renderFeed() {
             </div>
           </div>
 
+          <!-- Balon Komentar Mengambang (Seperti Gambar 1) -->
           <div class="relative z-10 my-auto space-y-3 pointer-events-none">
             <div class="bg-black/70 backdrop-blur-md border border-slate-700 p-2.5 rounded-2xl max-w-[240px] text-xs shadow-xl animate-bounce">
               <strong class="text-amber-400 block text-[10px]">senja_rerindou07</strong>
@@ -311,7 +309,7 @@ function playVisibleVideo() {
 // ----------------- KONTROL KONTEN PUBLIK (+) -----------------
 function openCreateMenuModal() {
   if (!currentUser) {
-    alert('Silakan mendaftar atau masuk terlebih dahulu!');
+    alert('Silakan daftar atau masuk terlebih dahulu!');
     openAuthModal('register');
     return;
   }
@@ -446,7 +444,7 @@ function stopLiveStream() {
   renderActiveLives();
 }
 
-// Mengundang Tamu Co-host (Maksimal 11 Tamu, Total 12 Orang dengan Host)
+// Mengundang Tamu Co-host (Maksimal 11 Tamu secara bergantian, Total 12 Orang dengan Host / Gambar 2)
 async function inviteGuestToLive() {
   if (liveGuestsStreams.length >= 11) {
     alert('Kapasitas maksimal 12 orang (1 Host + 11 Tamu) sudah penuh!');
@@ -463,7 +461,7 @@ async function inviteGuestToLive() {
   }
 }
 
-// Memperbarui Tampilan Grid Tamu Live (Hingga 12 Slot)
+// Memperbarui Tampilan Grid Tamu Live (Hingga 12 Slot / Gambar 2)
 function updateLiveGuestsGrid() {
   const gridContainer = document.getElementById('live-guests-grid');
   if (!gridContainer) return;
@@ -662,7 +660,6 @@ function updateProfileDisplay() {
   document.getElementById('profile-display-status').innerText = `"${currentUser.status || 'Anggota TATAP'}"`;
   document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
   
-  // Sembunyikan tombol masuk di header jika pengguna sudah login
   const headerBtn = document.getElementById('header-auth-btn');
   if (headerBtn) headerBtn.style.display = 'none';
 }
