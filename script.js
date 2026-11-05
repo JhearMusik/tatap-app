@@ -34,6 +34,8 @@ let recordedChunks = [];
 let localCameraStream = null;
 let liveGuestsStreams = [];
 let userCoins = 0;
+let isFollowingHost = false;
+let hostTargetGift = { name: '🌹 Mawar', coins: 10 };
 
 document.addEventListener('DOMContentLoaded', () => {
   const splashVideo = document.getElementById('splash-video');
@@ -441,7 +443,27 @@ function stopLiveStream() {
   renderActiveLives();
 }
 
-// ----------------- FITUR TAMBAH & TURUNKAN TAMU (Hingga 11 Tamu) -----------------
+// ----------------- FITUR IKUTI HOST & TAMBAH TEMAN (+) -----------------
+function toggleFollowHost() {
+  isFollowingHost = !isFollowingHost;
+  const btn = document.getElementById('btn-follow-host');
+  if (btn) {
+    if (isFollowingHost) {
+      btn.innerText = '✓ Mengikuti';
+      btn.className = 'absolute top-2 right-2 bg-slate-700 text-amber-400 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold z-20 shadow-md transition';
+      alert('Berhasil mengikuti host!');
+    } else {
+      btn.innerText = '+ Ikuti';
+      btn.className = 'absolute top-2 right-2 bg-amber-400 hover:bg-amber-300 text-black px-2.5 py-0.5 rounded-full text-[10px] font-extrabold z-20 shadow-md transition';
+      alert('Berhenti mengikuti host.');
+    }
+  }
+}
+
+function addFriend(guestName) {
+  alert(`✅ Berhasil menambahkan ${guestName} sebagai teman!`);
+}
+
 async function inviteGuestToLive() {
   if (liveGuestsStreams.length >= 11) {
     alert('Kapasitas maksimal 11 tamu sudah penuh!');
@@ -450,7 +472,8 @@ async function inviteGuestToLive() {
 
   try {
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    liveGuestsStreams.push({ id: Date.now(), stream: guestStream });
+    const guestName = `Tamu ${liveGuestsStreams.length + 1}`;
+    liveGuestsStreams.push({ id: Date.now(), name: guestName, stream: guestStream });
     updateLiveGuestsGrid();
     alert('Berhasil mengundang tamu baru ke siaran langsung!');
   } catch (e) {
@@ -494,15 +517,25 @@ function updateLiveGuestsGrid() {
 
       const label = document.createElement('span');
       label.className = 'absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-semibold text-sky-400 z-10';
-      label.innerText = `Tamu ${index + 1}`;
+      label.innerText = guest.name;
 
+      // Tombol Tambah (+) di Pojok Kanan Bawah untuk Menambahkan Teman
+      const addFriendBtn = document.createElement('button');
+      addFriendBtn.className = 'absolute bottom-1 right-1 bg-amber-400 hover:bg-amber-300 text-black w-5 h-5 rounded-full flex items-center justify-center text-[11px] font-extrabold z-20 shadow-md';
+      addFriendBtn.innerHTML = '+';
+      addFriendBtn.title = 'Tambah sebagai teman';
+      addFriendBtn.onclick = () => addFriend(guest.name);
+
+      // Tombol Silang (×) di Pojok Kanan Atas untuk Host Menurunkan Tamu
       const removeBtn = document.createElement('button');
       removeBtn.className = 'absolute top-1 right-1 bg-red-600 hover:bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold z-20 shadow-md';
       removeBtn.innerHTML = '×';
+      removeBtn.title = 'Turunkan tamu';
       removeBtn.onclick = () => removeGuest(guest.id);
 
       guestCard.appendChild(videoEl);
       guestCard.appendChild(label);
+      guestCard.appendChild(addFriendBtn);
       guestCard.appendChild(removeBtn);
       gridContainer.appendChild(guestCard);
     });
@@ -512,7 +545,23 @@ function updateLiveGuestsGrid() {
   if (guestCountEl) guestCountEl.innerText = liveGuestsStreams.length;
 }
 
-// ----------------- SISTEM KOIN & HADIAH (TIKTOK STYLE) -----------------
+// ----------------- PENGATURAN TARGET GIFT HOST & TIKTOK STYLE -----------------
+function openHostSettingsModal() {
+  document.getElementById('modal-host-settings').classList.remove('hidden');
+}
+
+function closeHostSettingsModal() {
+  document.getElementById('modal-host-settings').classList.add('hidden');
+}
+
+function setHostTargetGift(giftName, coinVal) {
+  hostTargetGift = { name: giftName, coins: coinVal };
+  const label = document.getElementById('host-target-gift-name');
+  if (label) label.innerText = `${giftName} (${coinVal} Koin)`;
+  closeHostSettingsModal();
+  alert(`🎯 Target hadiah host berhasil diatur ke ${giftName}!`);
+}
+
 function updateCoinDisplay() {
   const badge = document.getElementById('user-coin-balance');
   if (badge) badge.innerText = `🪙 ${userCoins} Koin`;
@@ -632,7 +681,6 @@ function handleUploadSubmit(e) {
   alert('Konten berhasil dibagikan dan kini bisa dilihat di beranda publik!');
 }
 
-// ----------------- FITUR PENCARIAN & PENDUKUNG -----------------
 function renderExploreGrid(filterKeyword = '') {
   const grid = document.getElementById('explore-grid');
   if (!grid) return;
