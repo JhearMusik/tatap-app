@@ -103,7 +103,7 @@
       </div>
     </div>
 
-    <!-- Tampilan Live Streaming Room (Dilengkapi Tombol Ikuti, Tombol Tambah Teman (+), & Target Gift Host) -->
+    <!-- Tampilan Live Streaming Room -->
     <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-3 pt-14 pb-20">
       
       <!-- Top Bar Live -->
@@ -148,7 +148,7 @@
           </span>
         </div>
 
-        <!-- Sisi Kanan: Grid Co-Host / Tamu (Dilengkapi Tombol Tambah Teman (+) di Pojok Kanan Bawah) -->
+        <!-- Sisi Kanan: Grid Co-Host / Tamu -->
         <div class="overflow-y-auto no-scrollbar grid grid-cols-2 gap-1.5 content-start pr-1" id="live-guests-grid">
           <div class="bg-slate-900/60 border border-slate-800 rounded-xl aspect-[3/4] flex flex-col items-center justify-center text-slate-500 text-[10px] text-center p-1">
             <span>Kosong</span>
@@ -170,32 +170,35 @@
       </div>
     </div>
 
-    <!-- Modal Pengaturan Target Hadiah oleh Host -->
+    <!-- Modal Pengaturan & Kustomisasi Target Hadiah oleh Host -->
     <div id="modal-host-settings" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-xs space-y-4 shadow-2xl text-center">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center mb-1">
-          <h3 class="text-sm font-bold text-amber-400">Atur Target Hadiah (Host)</h3>
+          <h3 class="text-sm font-bold text-amber-400">Atur & Buat Gift Sesuai Keinginan</h3>
           <button onclick="closeHostSettingsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <p class="text-[11px] text-slate-300">Pilih jenis hadiah yang Anda inginkan dari penonton:</p>
+        <p class="text-[11px] text-slate-300">Tambahkan atau sesuaikan hadiah yang dapat dikirim penonton dan tamu:</p>
         
-        <div class="space-y-2 text-xs">
-          <button onclick="setHostTargetGift('🌹 Mawar', 10)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
-            <span class="font-bold text-white">🌹 Mawar</span>
-            <span class="text-amber-400 font-semibold">🪙 10 Koin</span>
+        <!-- Form Tambah/Atur Gift Kustom -->
+        <form onsubmit="handleAddNewCustomGift(event)" class="space-y-2.5 bg-slate-800/60 p-3 rounded-xl border border-slate-700 text-xs">
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-1">Nama & Emoji Hadiah</label>
+            <input type="text" id="custom-gift-name" placeholder="Contoh: 👑 Mahkota Emas" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <div>
+            <label class="block text-[10px] text-slate-400 mb-1">Jumlah Nilai Koin</label>
+            <input type="number" id="custom-gift-coins" placeholder="Contoh: 1500" min="1" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-white focus:outline-none focus:border-amber-400">
+          </div>
+          <button type="submit" class="w-full bg-amber-400 hover:bg-amber-300 text-black font-bold py-2 rounded-lg transition shadow-md">
+            + Tambahkan / Ubah Gift Aktif
           </button>
-          <button onclick="setHostTargetGift('⭐ Bintang', 50)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
-            <span class="font-bold text-white">⭐ Bintang</span>
-            <span class="text-amber-400 font-semibold">🪙 50 Koin</span>
-          </button>
-          <button onclick="setHostTargetGift('🚀 Roket', 500)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
-            <span class="font-bold text-white">🚀 Roket</span>
-            <span class="text-amber-400 font-semibold">🪙 500 Koin</span>
-          </button>
-          <button onclick="setHostTargetGift('🦁 Singa', 2999)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
-            <span class="font-bold text-white">🦁 Singa</span>
-            <span class="text-amber-400 font-semibold">🪙 2.999 Koin</span>
-          </button>
+        </form>
+
+        <div class="space-y-1.5">
+          <p class="text-[11px] font-bold text-slate-300">Daftar Gift Aktif Saat Ini:</p>
+          <div id="host-active-gifts-list" class="space-y-1.5 max-h-36 overflow-y-auto no-scrollbar text-xs">
+            <!-- Render via JavaScript -->
+          </div>
         </div>
       </div>
     </div>
@@ -313,38 +316,9 @@
         </div>
 
         <div>
-          <p class="text-xs font-bold text-slate-300 mb-2">Katalog Hadiah (TikTok Style)</p>
+          <p class="text-xs font-bold text-slate-300 mb-2">Katalog Hadiah (Sinkron dengan Host)</p>
           <div class="grid grid-cols-3 gap-2.5 text-center text-xs max-h-48 overflow-y-auto no-scrollbar">
-            <button onclick="sendGift('🌹 Mawar', 10)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">🌹</span>
-              <span class="font-bold text-white text-[11px]">Mawar</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 10</span>
-            </button>
-            <button onclick="sendGift('☕ Kopi', 30)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">☕</span>
-              <span class="font-bold text-white text-[11px]">Kopi</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 30</span>
-            </button>
-            <button onclick="sendGift('⭐ Bintang', 50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">⭐</span>
-              <span class="font-bold text-white text-[11px]">Bintang</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 50</span>
-            </button>
-            <button onclick="sendGift('🚀 Roket', 500)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">🚀</span>
-              <span class="font-bold text-white text-[11px]">Roket</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 500</span>
-            </button>
-            <button onclick="sendGift('🦁 Singa', 2999)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">🦁</span>
-              <span class="font-bold text-white text-[11px]">Singa</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 2.999</span>
-            </button>
-            <button onclick="sendGift('🏎️ Mobil Sport', 5000)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center">
-              <span class="text-xl mb-1">🏎️</span>
-              <span class="font-bold text-white text-[11px]">Mobil Sport</span>
-              <span class="text-[9px] text-amber-400 font-semibold">🪙 5.000</span>
-            </button>
+            <!-- Render via JavaScript -->
           </div>
         </div>
       </div>
