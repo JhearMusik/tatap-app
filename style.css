@@ -37,3 +37,28 @@ html, body {
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite ease-in-out;
 }
+/* Menghilangkan scrollbar namun tetap bisa digulir */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Snap scrolling vertikal ala TikTok untuk Feed */
+.snap-y-mandatory {
+  scroll-snap-type: y mandatory;
+}
+.snap-start {
+  scroll-snap-align: start;
+}
+
+/* Animasi tambahan */
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spinSlow 6s linear infinite;
+}
