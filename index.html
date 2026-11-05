@@ -9,29 +9,21 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-black text-white font-sans antialiased overflow-hidden flex justify-center items-center">
+<body class="bg-black text-white font-sans antialiased overflow-hidden min-h-screen w-full flex justify-center items-center">
 
- <div id="splash-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
-  <video id="splash-video" class="absolute inset-0 w-full h-full object-cover z-0" autoplay muted playsinline preload="auto">
-    <source src="tatap.mp4" type="video/mp4">
-    Video tidak didukung oleh browser Anda.
-  </video>
-  <div class="absolute inset-0 bg-black/30 z-10"></div>
-</div>
-    
-    <div class="relative z-20 flex flex-col items-center space-y-4 max-w-xs">
-      <h1 class="text-4xl font-black tracking-widest text-amber-400 drop-shadow-lg">TATAP</h1>
-      <p class="text-xs text-slate-200 tracking-wider font-semibold drop-shadow">Jelajahi Dunia Lewat Video Pendek & Live</p>
-      
-      <!-- Tombol Manual untuk Membuka Aplikasi Jika Autoplay Video Diblokir Browser -->
-      <button onclick="hideSplashAndOpenAuth()" class="mt-4 bg-amber-400 hover:bg-amber-300 text-black font-bold px-6 py-2.5 rounded-full text-xs shadow-2xl transition animate-pulse">
-        Mulai Masuk ke TATAP 🚀
-      </button>
+  <!-- Splash Screen Video tatap.mp4 Presisi Tengah -->
+  <div id="splash-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
+    <div class="relative w-full h-full md:max-w-md md:h-[92vh] md:rounded-3xl overflow-hidden flex items-center justify-center">
+      <video id="splash-video" class="w-full h-full object-cover" autoplay muted playsinline preload="auto">
+        <source src="tatap.mp4" type="video/mp4">
+        Video tidak didukung oleh browser Anda.
+      </video>
+      <div class="absolute inset-0 bg-black/30 z-10"></div>
     </div>
   </div>
 
-  <!-- Mobile App Frame Container -->
-  <div class="relative w-full h-full md:max-w-md md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border-0 md:border border-slate-800 flex flex-col">
+  <!-- Mobile App Frame Container (Tengah di Laptop & HP) -->
+  <div class="relative w-full h-full md:max-w-md md:h-[92vh] bg-slate-900 md:rounded-3xl shadow-2xl overflow-hidden border-0 md:border border-slate-800 flex flex-col my-auto">
 
     <!-- Top Navigation Header -->
     <header class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-4 py-3 bg-gradient-to-b from-black/90 to-transparent">
@@ -43,7 +35,7 @@
         <span class="text-slate-600">|</span>
         <button class="text-white border-b-2 border-amber-400 pb-0.5">Untuk Anda</button>
       </div>
-      <div class="flex items-center space-x-1.5">
+      <div class="flex items-center space-x-1.5" id="header-auth-btn">
         <button onclick="openAuthModal('login')" class="text-[11px] bg-amber-400 text-black font-bold px-2.5 py-1 rounded-full hover:bg-amber-300 transition">Masuk</button>
         <button onclick="openAuthModal('register')" class="text-[11px] bg-slate-800 text-amber-400 border border-amber-400 font-bold px-2.5 py-1 rounded-full hover:bg-slate-800/80 transition">Daftar</button>
       </div>
@@ -278,12 +270,12 @@
       </div>
     </div>
 
-    <!-- Modal Auth (Wajib Daftar) -->
+    <!-- Modal Auth (Muncul Saat Tombol Profil / Masuk Ditekan) -->
     <div id="modal-auth" class="hidden absolute inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 w-full max-w-sm space-y-4 shadow-2xl">
         <div class="flex justify-between items-center">
           <h3 id="auth-title" class="text-lg font-bold text-amber-400">Daftar Akun TATAP</h3>
-          <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white hidden"><i data-lucide="x" class="w-5 h-5"></i></button>
+          <button id="btn-close-auth" onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
         <div class="flex bg-slate-800 p-1 rounded-xl text-xs font-semibold">
           <button id="tab-register" onclick="setAuthMode('register')" class="flex-1 py-2 rounded-lg bg-amber-400 text-black transition">Daftar</button>
