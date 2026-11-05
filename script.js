@@ -40,24 +40,35 @@ document.addEventListener('DOMContentLoaded', () => {
   const splashVideo = document.getElementById('splash-video');
   let splashHandled = false;
 
-  const triggerOpenAuth = () => {
+  window.hideSplashAndOpenAuth = () => {
     if (splashHandled) return;
     splashHandled = true;
-    hideSplashAndOpenAuth();
+    
+    const splash = document.getElementById('splash-screen');
+    if (splash) {
+      splash.style.opacity = '0';
+      setTimeout(() => {
+        splash.remove();
+        if (!currentUser) {
+          openAuthModal('register');
+        }
+      }, 700);
+    } else {
+      if (!currentUser) {
+        openAuthModal('register');
+      }
+    }
   };
 
   if (splashVideo) {
-    // Ketika video splash screen selesai berputar
-    splashVideo.onended = triggerOpenAuth;
-    
-    // Paksa putar video untuk mengatasi kebijakan browser modern
+    splashVideo.onended = hideSplashAndOpenAuth;
     splashVideo.play().catch(() => {
-      setTimeout(triggerOpenAuth, 1000);
+      // Jika browser memblokir autoplay, tombol manual di HTML akan membantu pengguna masuk
     });
   }
 
-  // Fallback pengaman (maksimal 4 detik jika video tidak terdeteksi onended)
-  setTimeout(triggerOpenAuth, 4000);
+  // Fallback pengaman otomatis setelah 4 detik
+  setTimeout(hideSplashAndOpenAuth, 4000);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
@@ -73,25 +84,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
-
-// Menghilangkan Splash Screen secara mulus DAHULU, baru memunculkan Form Auth
-function hideSplashAndOpenAuth() {
-  const splash = document.getElementById('splash-screen');
-  if (splash) {
-    splash.style.opacity = '0';
-    setTimeout(() => {
-      splash.remove();
-      // Tampilkan form pendaftaran/masuk HANYA SETELAH splash screen hilang
-      if (!currentUser) {
-        openAuthModal('register');
-      }
-    }, 700);
-  } else {
-    if (!currentUser) {
-      openAuthModal('register');
-    }
-  }
-}
 
 // Fungsi Berpindah Tab
 function switchTab(tab) {
