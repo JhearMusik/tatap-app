@@ -35,6 +35,17 @@ let localCameraStream = null;
 let liveGuestsStreams = [];
 let userCoins = 0;
 let isFollowingHost = false;
+
+// Katalog Gift yang dapat dikustomisasi oleh Host secara real-time
+let customGiftCatalog = [
+  { name: '🌹 Mawar', coins: 10 },
+  { name: '☕ Kopi', coins: 30 },
+  { name: '⭐ Bintang', coins: 50 },
+  { name: '🚀 Roket', coins: 500 },
+  { name: '🦁 Singa', coins: 2999 },
+  { name: '🏎️ Mobil Sport', coins: 5000 }
+];
+
 let hostTargetGift = { name: '🌹 Mawar', coins: 10 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -545,21 +556,88 @@ function updateLiveGuestsGrid() {
   if (guestCountEl) guestCountEl.innerText = liveGuestsStreams.length;
 }
 
-// ----------------- PENGATURAN TARGET GIFT HOST & TIKTOK STYLE -----------------
+// ----------------- PENGATURAN TARGET & KUSTOMISASI GIFT HOST -----------------
 function openHostSettingsModal() {
+  renderHostGiftsManager();
   document.getElementById('modal-host-settings').classList.remove('hidden');
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
 function closeHostSettingsModal() {
   document.getElementById('modal-host-settings').classList.add('hidden');
 }
 
-function setHostTargetGift(giftName, coinVal) {
-  hostTargetGift = { name: giftName, coins: coinVal };
+function handleAddNewCustomGift(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('custom-gift-name').value.trim();
+  const coinInput = parseInt(document.getElementById('custom-gift-coins').value);
+
+  if (!nameInput || isNaN(coinInput)) return;
+
+  const existing = customGiftCatalog.find(g => g.name.toLowerCase() === nameInput.toLowerCase());
+  if (existing) {
+    existing.coins = coinInput;
+  } else {
+    customGiftCatalog.push({ name: nameInput, coins: coinInput });
+  }
+
+  hostTargetGift = { name: nameInput, coins: coinInput };
   const label = document.getElementById('host-target-gift-name');
-  if (label) label.innerText = `${giftName} (${coinVal} Koin)`;
-  closeHostSettingsModal();
-  alert(`🎯 Target hadiah host berhasil diatur ke ${giftName}!`);
+  if (label) label.innerText = `${nameInput} (${coinInput} Koin)`;
+
+  document.getElementById('custom-gift-name').value = '';
+  document.getElementById('custom-gift-coins').value = '';
+
+  renderHostGiftsManager();
+  renderGiftModalCatalog();
+  alert(`✅ Gift "${nameInput}" (${coinInput} Koin) berhasil ditentukan dan aktif!`);
+}
+
+function renderHostGiftsManager() {
+  const container = document.getElementById('host-active-gifts-list');
+  if (!container) return;
+  container.innerHTML = '';
+
+  customGiftCatalog.forEach((gift, idx) => {
+    const item = document.createElement('div');
+    item.className = 'flex justify-between items-center bg-slate-800 p-2 rounded-xl border border-slate-700';
+    item.innerHTML = `
+      <span class="font-bold text-white">${gift.name}</span>
+      <div class="flex items-center gap-2">
+        <span class="text-amber-400 font-semibold">🪙 ${gift.coins} Koin</span>
+        <button onclick="removeCustomGift(${idx})" class="text-red-400 hover:text-red-300 font-bold px-1.5 py-0.5 rounded text-[10px]">✕</button>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+function removeCustomGift(index) {
+  if (customGiftCatalog.length <= 1) {
+    alert('Minimal harus ada 1 jenis gift aktif!');
+    return;
+  }
+  customGiftCatalog.splice(index, 1);
+  renderHostGiftsManager();
+  renderGiftModalCatalog();
+}
+
+function renderGiftModalCatalog() {
+  const catalogContainer = document.querySelector('#modal-gift .grid');
+  if (!catalogContainer) return;
+
+  catalogContainer.innerHTML = '';
+  customGiftCatalog.forEach(gift => {
+    const btn = document.createElement('button');
+    btn.className = 'bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl transition flex flex-col items-center';
+    btn.onclick = () => sendGift(gift.name, gift.coins);
+    btn.innerHTML = `
+      <span class="text-xl mb-1">${gift.name.split(' ')[0]}</span>
+      <span class="font-bold text-white text-[11px]">${gift.name.substring(gift.name.indexOf(' ') + 1)}</span>
+      <span class="text-[9px] text-amber-400 font-semibold">🪙 ${gift.coins}</span>
+    `;
+    catalogContainer.appendChild(btn);
+  });
 }
 
 function updateCoinDisplay() {
@@ -592,6 +670,7 @@ function openGiftModal() {
     return;
   }
   updateCoinDisplay();
+  renderGiftModalCatalog();
   document.getElementById('modal-gift').classList.remove('hidden');
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
