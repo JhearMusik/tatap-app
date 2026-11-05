@@ -1,4 +1,3 @@
-// Data Konten Publik (Video, Foto, dan Siaran Live yang dapat di-scroll bersamaan)
 let MOCK_VIDEOS = [
   {
     id: 'post_1',
@@ -34,9 +33,8 @@ let mediaRecorder;
 let recordedChunks = [];
 let localCameraStream = null;
 let liveGuestsStreams = [];
-let userCoins = 0; // Saldo awal sebelum register
+let userCoins = 0;
 
-// Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
   const splashVideo = document.getElementById('splash-video');
   let splashHandled = false;
@@ -78,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Fungsi Berpindah Tab Navigasi
 function switchTab(tab) {
   const feed = document.getElementById('video-feed');
   const explore = document.getElementById('explore-view');
@@ -125,7 +122,6 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -244,7 +240,6 @@ function renderFeed() {
   setupAutoplayObserver();
 }
 
-// Render Badge Siaran Live Aktif di Menu Temukan
 function renderActiveLives() {
   const container = document.getElementById('active-live-list');
   if (!container) return;
@@ -306,7 +301,6 @@ function playVisibleVideo() {
   }
 }
 
-// ----------------- KONTROL KONTEN PUBLIK (+) -----------------
 function openCreateMenuModal() {
   if (!currentUser) {
     alert('Silakan daftar atau masuk terlebih dahulu!');
@@ -399,6 +393,9 @@ async function startLiveStream() {
   closeCreateMenuModal();
   document.getElementById('live-room-view').classList.remove('hidden');
 
+  const hostNameLabel = document.getElementById('host-name-label');
+  if (hostNameLabel) hostNameLabel.innerText = currentUser.username;
+
   try {
     localCameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     document.getElementById('live-video-stream').srcObject = localCameraStream;
@@ -444,51 +441,72 @@ function stopLiveStream() {
   renderActiveLives();
 }
 
-// Mengundang Tamu Co-host (Maksimal 11 Tamu, Total 12 Orang dengan Host)
+// ----------------- FITUR TAMBAH & TURUNKAN TAMU (Hingga 11 Tamu) -----------------
 async function inviteGuestToLive() {
   if (liveGuestsStreams.length >= 11) {
-    alert('Kapasitas maksimal 12 orang (1 Host + 11 Tamu) sudah penuh!');
+    alert('Kapasitas maksimal 11 tamu sudah penuh!');
     return;
   }
 
   try {
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    liveGuestsStreams.push(guestStream);
+    liveGuestsStreams.push({ id: Date.now(), stream: guestStream });
     updateLiveGuestsGrid();
-    alert('Berhasil mengundang tamu co-host baru!');
+    alert('Berhasil mengundang tamu baru ke siaran langsung!');
   } catch (e) {
     alert('Gagal mengaktifkan kamera tamu: ' + e.message);
   }
+}
+
+function removeGuest(guestId) {
+  liveGuestsStreams = liveGuestsStreams.filter(g => {
+    if (g.id === guestId) {
+      g.stream.getTracks().forEach(track => track.stop());
+      return false;
+    }
+    return true;
+  });
+  updateLiveGuestsGrid();
+  alert('Tamu berhasil diturunkan dari siaran langsung.');
 }
 
 function updateLiveGuestsGrid() {
   const gridContainer = document.getElementById('live-guests-grid');
   if (!gridContainer) return;
 
-  gridContainer.innerHTML = `
-    <div class="relative bg-slate-900/80 border-2 border-amber-400 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-lg">
-      <span class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-amber-400 z-10">Host (${currentUser ? currentUser.username : 'Anda'})</span>
-    </div>
-  `;
+  if (liveGuestsStreams.length === 0) {
+    gridContainer.innerHTML = `
+      <div class="col-span-2 bg-slate-900/60 border border-slate-800 rounded-xl aspect-[3/4] flex flex-col items-center justify-center text-slate-500 text-[10px] text-center p-2">
+        <span>Belum ada tamu. Klik "Undang Tamu" di bawah.</span>
+      </div>
+    `;
+  } else {
+    gridContainer.innerHTML = '';
+    liveGuestsStreams.forEach((guest, index) => {
+      const guestCard = document.createElement('div');
+      guestCard.className = 'relative bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-md';
+      
+      const videoEl = document.createElement('video');
+      videoEl.className = 'w-full h-full object-cover';
+      videoEl.autoplay = true;
+      videoEl.playsInline = true;
+      videoEl.srcObject = guest.stream;
 
-  liveGuestsStreams.forEach((stream, index) => {
-    const guestCard = document.createElement('div');
-    guestCard.className = 'relative bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-md';
-    
-    const videoEl = document.createElement('video');
-    videoEl.className = 'w-full h-full object-cover';
-    videoEl.autoplay = true;
-    videoEl.playsInline = true;
-    videoEl.srcObject = stream;
+      const label = document.createElement('span');
+      label.className = 'absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-semibold text-sky-400 z-10';
+      label.innerText = `Tamu ${index + 1}`;
 
-    const label = document.createElement('span');
-    label.className = 'absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-semibold text-sky-400 z-10';
-    label.innerText = `Tamu ${index + 1}`;
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'absolute top-1 right-1 bg-red-600 hover:bg-red-500 text-white w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold z-20 shadow-md';
+      removeBtn.innerHTML = '×';
+      removeBtn.onclick = () => removeGuest(guest.id);
 
-    guestCard.appendChild(videoEl);
-    guestCard.appendChild(label);
-    gridContainer.appendChild(guestCard);
-  });
+      guestCard.appendChild(videoEl);
+      guestCard.appendChild(label);
+      guestCard.appendChild(removeBtn);
+      gridContainer.appendChild(guestCard);
+    });
+  }
 
   const guestCountEl = document.getElementById('guest-count');
   if (guestCountEl) guestCountEl.innerText = liveGuestsStreams.length;
@@ -772,8 +790,7 @@ function handleAuthSubmit(e) {
       name: usernameInput.replace('@', ''),
       status: 'Anggota baru TATAP ✨'
     };
-    // Bonus 100 koin untuk pengguna baru yang mendaftar
-    userCoins = 100;
+    userCoins = 100; // Bonus 100 koin pendaftaran baru
     alert('Pendaftaran berhasil! Selamat datang di TATAP. Anda mendapatkan bonus 🪙 100 Koin gratis!');
   } else {
     currentUser = {
