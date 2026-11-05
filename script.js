@@ -34,6 +34,7 @@ let mediaRecorder;
 let recordedChunks = [];
 let localCameraStream = null;
 let liveGuestsStreams = [];
+let userCoins = 0; // Saldo awal sebelum register
 
 // Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
@@ -124,7 +125,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif ala Gambar 1)
+// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -156,7 +157,6 @@ function renderFeed() {
             </div>
           </div>
 
-          <!-- Balon Komentar Mengambang (Seperti Gambar 1) -->
           <div class="relative z-10 my-auto space-y-3 pointer-events-none">
             <div class="bg-black/70 backdrop-blur-md border border-slate-700 p-2.5 rounded-2xl max-w-[240px] text-xs shadow-xl animate-bounce">
               <strong class="text-amber-400 block text-[10px]">senja_rerindou07</strong>
@@ -444,7 +444,7 @@ function stopLiveStream() {
   renderActiveLives();
 }
 
-// Mengundang Tamu Co-host (Maksimal 11 Tamu secara bergantian, Total 12 Orang dengan Host / Gambar 2)
+// Mengundang Tamu Co-host (Maksimal 11 Tamu, Total 12 Orang dengan Host)
 async function inviteGuestToLive() {
   if (liveGuestsStreams.length >= 11) {
     alert('Kapasitas maksimal 12 orang (1 Host + 11 Tamu) sudah penuh!');
@@ -461,7 +461,6 @@ async function inviteGuestToLive() {
   }
 }
 
-// Memperbarui Tampilan Grid Tamu Live (Hingga 12 Slot / Gambar 2)
 function updateLiveGuestsGrid() {
   const gridContainer = document.getElementById('live-guests-grid');
   if (!gridContainer) return;
@@ -495,11 +494,78 @@ function updateLiveGuestsGrid() {
   if (guestCountEl) guestCountEl.innerText = liveGuestsStreams.length;
 }
 
-function openGiftModal() { document.getElementById('modal-gift').classList.remove('hidden'); }
-function closeGiftModal() { document.getElementById('modal-gift').classList.add('hidden'); }
+// ----------------- SISTEM KOIN & HADIAH (TIKTOK STYLE) -----------------
+function updateCoinDisplay() {
+  const badge = document.getElementById('user-coin-balance');
+  if (badge) badge.innerText = `🪙 ${userCoins} Koin`;
+
+  const profileCoin = document.getElementById('profile-coin-count');
+  if (profileCoin) profileCoin.innerText = `🪙 ${userCoins} Koin`;
+}
+
+function openTopUpModal() {
+  document.getElementById('modal-topup').classList.remove('hidden');
+}
+
+function closeTopUpModal() {
+  document.getElementById('modal-topup').classList.add('hidden');
+}
+
+function buyCoins(amount, price) {
+  userCoins += amount;
+  updateCoinDisplay();
+  closeTopUpModal();
+  alert(`✅ Berhasil membeli ${amount} koin seharga ${price}! Saldo Anda sekarang ${userCoins} Koin.`);
+}
+
+function openGiftModal() {
+  if (!currentUser) {
+    alert('Silakan masuk terlebih dahulu untuk mengirim hadiah!');
+    openAuthModal('login');
+    return;
+  }
+  updateCoinDisplay();
+  document.getElementById('modal-gift').classList.remove('hidden');
+  try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+}
+
+function closeGiftModal() {
+  document.getElementById('modal-gift').classList.add('hidden');
+}
+
 function sendGift(giftName, coinValue) {
-  alert(`🎁 Berhasil mengirim hadiah ${giftName} senilai ${coinValue} Koin!`);
+  if (userCoins < coinValue) {
+    alert(`❌ Koin Anda tidak cukup! Anda memerlukan ${coinValue} Koin. Silakan lakukan top-up koin terlebih dahulu.`);
+    closeGiftModal();
+    openTopUpModal();
+    return;
+  }
+
+  userCoins -= coinValue;
+  updateCoinDisplay();
   closeGiftModal();
+  showFloatingGiftAnimation(giftName);
+}
+
+function showFloatingGiftAnimation(giftName) {
+  const liveRoom = document.getElementById('live-room-view');
+  if (!liveRoom || liveRoom.classList.contains('hidden')) {
+    alert(`🎁 Berhasil mengirim hadiah ${giftName}!`);
+    return;
+  }
+
+  const animContainer = document.createElement('div');
+  animContainer.className = 'absolute z-50 bottom-32 left-1/2 transform -translate-x-1/2 bg-black/80 border border-amber-400 px-5 py-3 rounded-3xl flex items-center gap-3 shadow-2xl animate-bounce';
+  animContainer.innerHTML = `
+    <span class="text-3xl">${giftName.split(' ')[0]}</span>
+    <div class="text-xs text-left">
+      <strong class="text-amber-400 block">${currentUser ? currentUser.username : '@pengguna'}</strong>
+      <span class="text-white">Mengirim ${giftName}! ✨</span>
+    </div>
+  `;
+
+  liveRoom.appendChild(animContainer);
+  setTimeout(() => { animContainer.remove(); }, 3000);
 }
 
 function openUploadModal() {
@@ -659,6 +725,7 @@ function updateProfileDisplay() {
   document.getElementById('profile-display-name').innerText = currentUser.username;
   document.getElementById('profile-display-status').innerText = `"${currentUser.status || 'Anggota TATAP'}"`;
   document.getElementById('profile-avatar-text').innerText = (currentUser.name || 'U').charAt(0).toUpperCase();
+  updateCoinDisplay();
   
   const headerBtn = document.getElementById('header-auth-btn');
   if (headerBtn) headerBtn.style.display = 'none';
@@ -705,7 +772,9 @@ function handleAuthSubmit(e) {
       name: usernameInput.replace('@', ''),
       status: 'Anggota baru TATAP ✨'
     };
-    alert('Pendaftaran berhasil! Selamat datang di TATAP.');
+    // Bonus 100 koin untuk pengguna baru yang mendaftar
+    userCoins = 100;
+    alert('Pendaftaran berhasil! Selamat datang di TATAP. Anda mendapatkan bonus 🪙 100 Koin gratis!');
   } else {
     currentUser = {
       username: '@' + email.split('@')[0],
