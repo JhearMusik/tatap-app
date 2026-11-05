@@ -103,7 +103,7 @@
       </div>
     </div>
 
-    <!-- Tampilan Live Streaming Room (Layout Split ala Gambar 2) -->
+    <!-- Tampilan Live Streaming Room (Dilengkapi Tombol Ikuti, Tombol Tambah Teman (+), & Target Gift Host) -->
     <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-3 pt-14 pb-20">
       
       <!-- Top Bar Live -->
@@ -115,24 +115,41 @@
         <button onclick="stopLiveStream()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-lg">Akhiri Live</button>
       </div>
 
-      <!-- Split Layout: Host di Kiri, Grid Tamu di Kanan (Mirip Gambar 2) -->
+      <!-- Target Gift / Hadiah Pilihan Host -->
+      <div class="relative z-10 bg-slate-900/80 border border-amber-400/40 px-3 py-1.5 rounded-xl flex justify-between items-center text-xs mb-1">
+        <div class="flex items-center gap-1.5">
+          <span class="text-base">🎯</span>
+          <span class="text-slate-300 font-medium">Target Gift Host: <strong id="host-target-gift-name" class="text-amber-400">🌹 Mawar (10 Koin)</strong></span>
+        </div>
+        <button onclick="openHostSettingsModal()" class="text-[10px] bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-400 px-2 py-1 rounded-lg font-bold transition">Atur Gift</button>
+      </div>
+
+      <!-- Split Layout: Host di Kiri, Grid Tamu di Kanan -->
       <div class="relative z-10 flex-1 my-1 grid grid-cols-2 gap-2 overflow-hidden items-stretch">
         
-        <!-- Sisi Kiri: Host Utama -->
+        <!-- Sisi Kiri: Host Utama (Dilengkapi Tombol Ikuti) -->
         <div class="relative bg-slate-950 border-2 border-amber-400 rounded-2xl overflow-hidden flex flex-col items-center justify-center shadow-2xl h-full">
           <video id="live-video-stream" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline muted></video>
-          <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+          
+          <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
+            <span class="bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full text-[9px] font-bold">
+              👑 Host Utama
+            </span>
+          </div>
+
+          <!-- Tombol Ikuti Host -->
+          <button id="btn-follow-host" onclick="toggleFollowHost()" class="absolute top-2 right-2 bg-amber-400 hover:bg-amber-300 text-black px-2.5 py-0.5 rounded-full text-[10px] font-extrabold z-20 shadow-md transition">
+            + Ikuti
+          </button>
+
           <span class="absolute bottom-2 left-2 bg-black/70 px-2 py-0.5 rounded-md text-[10px] font-extrabold text-amber-400 z-10 border border-amber-400/30">
             Host (<span id="host-name-label">Anda</span>)
           </span>
-          <span class="absolute top-2 left-2 bg-amber-500/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-full text-[9px] font-bold z-10">
-            👑 Host Utama
-          </span>
         </div>
 
-        <!-- Sisi Kanan: Grid Co-Host / Tamu (Hingga 11 Tamu, Bisa Ditambah & Diturunkan) -->
+        <!-- Sisi Kanan: Grid Co-Host / Tamu (Dilengkapi Tombol Tambah Teman (+) di Pojok Kanan Bawah) -->
         <div class="overflow-y-auto no-scrollbar grid grid-cols-2 gap-1.5 content-start pr-1" id="live-guests-grid">
-          <!-- Kotak placeholder jika belum ada tamu -->
           <div class="bg-slate-900/60 border border-slate-800 rounded-xl aspect-[3/4] flex flex-col items-center justify-center text-slate-500 text-[10px] text-center p-1">
             <span>Kosong</span>
           </div>
@@ -140,7 +157,7 @@
 
       </div>
 
-      <!-- Bottom Actions (Undang Tamu & Kirim Gift) -->
+      <!-- Bottom Actions -->
       <div class="relative z-10 space-y-2 pt-2 border-t border-slate-800/80">
         <div class="flex gap-2 justify-center">
           <button onclick="inviteGuestToLive()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg transition">
@@ -148,6 +165,36 @@
           </button>
           <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg transition">
             <i data-lucide="gift" class="w-4 h-4"></i> Kirim Hadiah
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pengaturan Target Hadiah oleh Host -->
+    <div id="modal-host-settings" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-xs space-y-4 shadow-2xl text-center">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="text-sm font-bold text-amber-400">Atur Target Hadiah (Host)</h3>
+          <button onclick="closeHostSettingsModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-[11px] text-slate-300">Pilih jenis hadiah yang Anda inginkan dari penonton:</p>
+        
+        <div class="space-y-2 text-xs">
+          <button onclick="setHostTargetGift('🌹 Mawar', 10)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-white">🌹 Mawar</span>
+            <span class="text-amber-400 font-semibold">🪙 10 Koin</span>
+          </button>
+          <button onclick="setHostTargetGift('⭐ Bintang', 50)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-white">⭐ Bintang</span>
+            <span class="text-amber-400 font-semibold">🪙 50 Koin</span>
+          </button>
+          <button onclick="setHostTargetGift('🚀 Roket', 500)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-white">🚀 Roket</span>
+            <span class="text-amber-400 font-semibold">🪙 500 Koin</span>
+          </button>
+          <button onclick="setHostTargetGift('🦁 Singa', 2999)" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2.5 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-white">🦁 Singa</span>
+            <span class="text-amber-400 font-semibold">🪙 2.999 Koin</span>
           </button>
         </div>
       </div>
@@ -244,7 +291,7 @@
       </div>
     </div>
 
-    <!-- Modal Gift & Katalog Hadiah Ala TikTok -->
+    <!-- Modal Gift & Katalog Hadiah -->
     <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
       <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
@@ -303,7 +350,7 @@
       </div>
     </div>
 
-    <!-- Modal Pembelian / Top Up Koin -->
+    <!-- Modal Top-Up Koin -->
     <div id="modal-topup" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-xs space-y-4 shadow-2xl text-center">
         <div class="flex justify-between items-center mb-1">
