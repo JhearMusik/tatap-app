@@ -102,7 +102,7 @@
       </div>
     </div>
 
-    <!-- Tampilan Live Streaming Room (Mendukung hingga 12 Tamu) -->
+    <!-- Tampilan Live Streaming Room (Mendukung hingga 12 Tamu / Gambar 2) -->
     <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-3 pt-14 pb-20">
       <div class="absolute inset-0 z-0">
         <video id="live-video-stream" class="w-full h-full object-cover" autoplay playsinline muted></video>
@@ -116,7 +116,7 @@
         <button onclick="stopLiveStream()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-lg">Akhiri Live</button>
       </div>
 
-      <!-- Grid Tamu Live (Maksimal 12 Orang) -->
+      <!-- Grid Tamu Live (Mendukung total 12 slot: 1 Host + 11 Tamu) -->
       <div class="relative z-10 flex-1 my-2 overflow-y-auto no-scrollbar grid grid-cols-3 gap-2 items-center content-center" id="live-guests-grid">
         <div class="relative bg-slate-900/80 border-2 border-amber-400 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-lg">
           <span class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-amber-400 z-10">Host (Anda)</span>
