@@ -226,17 +226,74 @@
       </div>
     </div>
 
-    <!-- Modal Gift -->
+    <!-- Modal Gift & Koin ala TikTok -->
     <div id="modal-gift" class="hidden absolute inset-0 z-50 bg-black/70 backdrop-blur-sm flex flex-col justify-end">
-      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-6 w-full space-y-4 shadow-2xl">
+      <div class="bg-slate-900 border-t border-slate-700 rounded-t-3xl p-5 w-full space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-          <h3 class="font-bold text-sm text-amber-400">Kirim Hadiah Virtual 🎁</h3>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-300">Saldo Anda:</span>
+            <span id="user-coin-balance" class="text-xs font-extrabold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-full border border-amber-400/30">🪙 100 Koin</span>
+          </div>
           <button onclick="closeGiftModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
         </div>
-        <div class="grid grid-cols-3 gap-3 text-center text-xs">
-          <button onclick="sendGift('🌹 Mawar', 10)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition"><span class="text-2xl block mb-1">🌹</span><span class="font-bold text-white">Mawar</span></button>
-          <button onclick="sendGift('⭐ Bintang', 50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition"><span class="text-2xl block mb-1">⭐</span><span class="font-bold text-white">Bintang</span></button>
-          <button onclick="sendGift('🚀 Roket', 500)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition"><span class="text-2xl block mb-1">🚀</span><span class="font-bold text-white">Roket</span></button>
+
+        <!-- Tombol Beli Koin / Top Up -->
+        <div class="bg-slate-800/80 p-3 rounded-2xl flex items-center justify-between border border-slate-700">
+          <div class="text-xs">
+            <p class="font-bold text-white">Butuh tambahan koin?</p>
+            <p class="text-[10px] text-slate-400">Top up koin instan untuk mendukung kreator.</p>
+          </div>
+          <button onclick="openTopUpModal()" class="bg-amber-400 hover:bg-amber-300 text-black font-bold px-3 py-1.5 rounded-xl text-xs transition shadow-md">
+            + Beli Koin
+          </button>
+        </div>
+
+        <!-- Daftar Hadiah -->
+        <div>
+          <p class="text-xs font-bold text-slate-300 mb-2">Pilih Hadiah</p>
+          <div class="grid grid-cols-3 gap-3 text-center text-xs">
+            <button onclick="sendGift('🌹 Mawar', 10)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition flex flex-col items-center">
+              <span class="text-2xl mb-1">🌹</span>
+              <span class="font-bold text-white">Mawar</span>
+              <span class="text-[10px] text-amber-400 font-semibold">🪙 10</span>
+            </button>
+            <button onclick="sendGift('⭐ Bintang', 50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition flex flex-col items-center">
+              <span class="text-2xl mb-1">⭐</span>
+              <span class="font-bold text-white">Bintang</span>
+              <span class="text-[10px] text-amber-400 font-semibold">🪙 50</span>
+            </button>
+            <button onclick="sendGift('🚀 Roket', 500)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-2xl transition flex flex-col items-center">
+              <span class="text-2xl mb-1">🚀</span>
+              <span class="font-bold text-white">Roket</span>
+              <span class="text-[10px] text-amber-400 font-semibold">🪙 500</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pembelian / Top Up Koin -->
+    <div id="modal-topup" class="hidden absolute inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-700 rounded-2xl p-5 w-full max-w-xs space-y-4 shadow-2xl text-center">
+        <div class="flex justify-between items-center mb-1">
+          <h3 class="text-sm font-bold text-amber-400">Isi Ulang (Top-Up) Koin</h3>
+          <button onclick="closeTopUpModal()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        </div>
+        <p class="text-[11px] text-slate-300">Pilih paket koin untuk mulai mendukung siaran langsung:</p>
+        
+        <div class="space-y-2 text-xs">
+          <button onclick="buyCoins(100, 'Rp 15.000')" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-amber-400">🪙 100 Koin</span>
+            <span class="text-slate-300 font-semibold">Rp 15.000</span>
+          </button>
+          <button onclick="buyCoins(500, 'Rp 75.000')" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-amber-400">🪙 500 Koin</span>
+            <span class="text-slate-300 font-semibold">Rp 75.000</span>
+          </button>
+          <button onclick="buyCoins(1000, 'Rp 150.000')" class="w-full bg-slate-800 hover:bg-slate-700 border border-slate-700 p-3 rounded-xl flex justify-between items-center transition">
+            <span class="font-bold text-amber-400">🪙 1000 Koin</span>
+            <span class="text-slate-300 font-semibold">Rp 150.000</span>
+          </button>
         </div>
       </div>
     </div>
