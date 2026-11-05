@@ -11,12 +11,12 @@
 </head>
 <body class="bg-black text-white font-sans antialiased overflow-hidden flex justify-center items-center">
 
-  <!-- Splash Screen dengan Video Tatap — c01.mp4 & Teks Judul -->
+  <!-- Splash Screen dengan Video tatap.mp4 & Teks Judul -->
   <div id="splash-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
-    <video id="splash-video" class="absolute inset-0 w-full h-full object-cover z-0" autoplay muted playsinline>
-  <source src="tatap.mp4" type="video/mp4">
-  Video tidak didukung oleh browser Anda.
-</video>
+    <video id="splash-video" class="absolute inset-0 w-full h-full object-cover z-0" autoplay muted playsinline preload="auto">
+      <source src="./tatap.mp4" type="video/mp4">
+      Video tidak didukung oleh browser Anda.
+    </video>
     <div class="absolute inset-0 bg-black/40 z-10"></div>
     <div class="relative z-20 flex flex-col items-center space-y-3 text-center px-6 animate-pulse">
       <h1 class="text-4xl font-black tracking-widest text-amber-400 drop-shadow-lg">TATAP</h1>
@@ -120,11 +120,9 @@
 
       <!-- Grid Tamu Live (Maksimal 12 Orang) -->
       <div class="relative z-10 flex-1 my-2 overflow-y-auto no-scrollbar grid grid-cols-3 gap-2 items-center content-center" id="live-guests-grid">
-        <!-- Slot Host Utama -->
         <div class="relative bg-slate-900/80 border-2 border-amber-400 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-lg">
           <span class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-amber-400 z-10">Host (Anda)</span>
         </div>
-        <!-- Slot Tamu 1 sampai 11 akan digenerate secara dinamis -->
       </div>
 
       <div class="relative z-10 space-y-2">
