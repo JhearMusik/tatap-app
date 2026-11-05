@@ -33,22 +33,15 @@ let activeVideoId = null;
 let mediaRecorder;
 let recordedChunks = [];
 let localCameraStream = null;
+let liveGuestsStreams = []; // Array untuk menyimpan maksimal 11 tamu co-host
 
 // Eksekusi utama saat halaman dimuat
 document.addEventListener('DOMContentLoaded', () => {
   const splashVideo = document.getElementById('splash-video');
-  
-  // Jika video selesai diputar, hilangkan splash screen baru buka form daftar
   if (splashVideo) {
-    splashVideo.onended = () => { 
-      hideSplashAndOpenAuth(); 
-    };
+    splashVideo.onended = () => { hideSplashAndOpenAuth(); };
   }
-  
-  // Fallback cadangan jika video gagal memicu event onended (misal dalam 5 detik)
-  setTimeout(() => { 
-    hideSplashAndOpenAuth(); 
-  }, 5000);
+  setTimeout(() => { hideSplashAndOpenAuth(); }, 5000);
 
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 
@@ -65,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Fungsi khusus: Menghilangkan Splash Screen secara mulus DAHULU, baru menampilkan Form Auth
 function hideSplashAndOpenAuth() {
   const splash = document.getElementById('splash-screen');
   if (splash && !splash.classList.contains('fade-out')) {
@@ -73,7 +65,6 @@ function hideSplashAndOpenAuth() {
     splash.style.opacity = '0';
     setTimeout(() => {
       splash.remove();
-      // Tampilkan form pendaftaran/masuk HANYA SETELAH splash screen selesai hilang
       if (!currentUser) {
         openAuthModal('register');
       }
@@ -129,7 +120,7 @@ function switchTab(tab) {
   try { if (window.lucide) lucide.createIcons(); } catch (e) {}
 }
 
-// Render Beranda Utama (Feed Publik dengan Dukungan Live Streaming interaktif saat di-scroll)
+// Render Beranda Utama (Feed Publik dengan Fitur Live Interaktif ala Gambar 1)
 function renderFeed() {
   const feed = document.getElementById('video-feed');
   if (!feed) return;
@@ -143,27 +134,47 @@ function renderFeed() {
     if (itemData.type === 'image') {
       mediaElement = `<img src="${itemData.media_url}" class="w-full h-full object-cover">`;
     } else if (itemData.type === 'live') {
+      // Tampilan Feed Live interaktif seperti Gambar 1 (dengan balon komentar mengambang & badge Live)
       mediaElement = `
-        <div class="relative w-full h-full bg-slate-950 flex flex-col justify-between p-4 pt-16 pb-20">
+        <div class="relative w-full h-full bg-slate-950 flex flex-col justify-between p-4 pt-14 pb-20">
           <div class="absolute inset-0 z-0">
             <video id="feed-live-video-${itemData.id}" class="w-full h-full object-cover" autoplay playsinline muted></video>
             <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
           </div>
+          
+          <!-- Header Live (Badge & Penonton) -->
           <div class="relative z-10 flex justify-between items-center">
-            <div class="flex items-center space-x-2 bg-black/50 backdrop-blur-md px-3 py-1.5 rounded-full border border-red-500/30">
+            <div class="flex items-center space-x-2 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-red-500/40">
               <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
-              <span class="text-xs font-bold text-red-400">SIARAN LANGSUNG PUBLIK</span>
+              <span class="text-[11px] font-bold text-red-400">LIVE</span>
+            </div>
+            <div class="flex items-center gap-2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-xs">
+              <span class="text-amber-400 font-bold">❤️ 121</span>
+              <span class="text-slate-300">👥 2.1K</span>
             </div>
           </div>
-          <div class="relative z-10 my-auto flex flex-col items-center justify-center text-center space-y-2">
-            <div class="w-20 h-20 rounded-full border-2 border-amber-400 bg-slate-900 flex items-center justify-center font-bold text-2xl text-amber-400 shadow-2xl">
-              ${itemData.username.charAt(1).toUpperCase()}
+
+          <!-- Balon Komentar Mengambang (Seperti Gambar 1) -->
+          <div class="relative z-10 my-auto space-y-3 pointer-events-none">
+            <div class="bg-black/70 backdrop-blur-md border border-slate-700 p-2.5 rounded-2xl max-w-[240px] text-xs shadow-xl animate-bounce">
+              <strong class="text-amber-400 block text-[10px]">senja_rerindou07</strong>
+              <p class="text-white mt-0.5">gimana tuuh caranya</p>
             </div>
-            <h3 class="font-bold text-lg text-white">Host (${itemData.username})</h3>
-            <p class="text-xs text-slate-300">${itemData.caption}</p>
+            <div class="flex flex-col items-center justify-center text-center space-y-1 bg-black/40 backdrop-blur-sm p-4 rounded-3xl border border-white/10">
+              <div class="w-16 h-16 rounded-full border-2 border-amber-400 bg-slate-900 flex items-center justify-center font-bold text-xl text-amber-400 shadow-xl">
+                ${itemData.username.charAt(1).toUpperCase()}
+              </div>
+              <h3 class="font-bold text-sm text-white">Host (${itemData.username})</h3>
+              <p class="text-[11px] text-slate-300 line-clamp-1">${itemData.caption}</p>
+            </div>
           </div>
+
+          <!-- Tombol Interaksi Live di Bawah -->
           <div class="relative z-10 flex gap-2 justify-center">
-            <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+            <button onclick="startLiveStream()" class="bg-amber-400 hover:bg-amber-300 text-black px-5 py-2 rounded-full text-xs font-bold shadow-lg transition">
+              Gabung Live
+            </button>
+            <button onclick="openGiftModal()" class="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-full text-xs font-bold shadow-lg transition flex items-center gap-1">
               <i data-lucide="gift" class="w-4 h-4"></i> Kirim Hadiah
             </button>
           </div>
@@ -406,11 +417,11 @@ async function startLiveStream() {
           comments: []
         });
       }
-      document.getElementById('live-host-label').innerText = `Host (${currentUser.username})`;
     }
 
     renderFeed();
     renderActiveLives();
+    updateLiveGuestsGrid();
   } catch (e) {
     alert('Gagal mengaktifkan kamera Live: ' + e.message);
     stopLiveStream();
@@ -422,22 +433,64 @@ function stopLiveStream() {
     ACTIVE_LIVES = ACTIVE_LIVES.filter(l => l.username !== currentUser.username);
     MOCK_VIDEOS = MOCK_VIDEOS.filter(v => v.type !== 'live' || v.username !== currentUser.username);
   }
-  document.getElementById('guest-slot-1').classList.add('hidden');
+  liveGuestsStreams = [];
   document.getElementById('live-room-view').classList.add('hidden');
   switchTab('feed');
   renderFeed();
   renderActiveLives();
 }
 
+// Fungsi Mengundang Tamu Co-host (Maksimal 11 Tamu, Total 12 Orang dengan Host)
 async function inviteGuestToLive() {
-  document.getElementById('guest-slot-1').classList.remove('hidden');
+  if (liveGuestsStreams.length >= 11) {
+    alert('Kapasitas maksimal 12 orang (1 Host + 11 Tamu) sudah penuh!');
+    return;
+  }
+
   try {
     const guestStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    document.getElementById('guest-video-element').srcObject = guestStream;
-    alert('Berhasil mengundang tamu co-host!');
+    liveGuestsStreams.push(guestStream);
+    updateLiveGuestsGrid();
+    alert('Berhasil mengundang tamu co-host baru!');
   } catch (e) {
-    alert('Gagal mengundang tamu: ' + e.message);
+    alert('Gagal mengaktifkan kamera tamu: ' + e.message);
   }
+}
+
+// Memperbarui Tampilan Grid Tamu Live (Mendukung hingga 12 Slot seperti Gambar 2)
+function updateLiveGuestsGrid() {
+  const gridContainer = document.getElementById('live-guests-grid');
+  if (!gridContainer) return;
+
+  // Pertahankan slot host utama di urutan pertama
+  gridContainer.innerHTML = `
+    <div class="relative bg-slate-900/80 border-2 border-amber-400 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-lg">
+      <span class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-amber-400 z-10">Host (Anda)</span>
+    </div>
+  `;
+
+  // Render slot tamu yang sudah bergabung
+  liveGuestsStreams.forEach((stream, index) => {
+    const guestCard = document.createElement('div');
+    guestCard.className = 'relative bg-slate-800/90 border border-slate-700 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-md';
+    
+    const videoEl = document.createElement('video');
+    videoEl.className = 'w-full h-full object-cover';
+    videoEl.autoplay = true;
+    videoEl.playsInline = true;
+    videoEl.srcObject = stream;
+
+    const label = document.createElement('span');
+    label.className = 'absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-semibold text-sky-400 z-10';
+    label.innerText = `Tamu ${index + 1}`;
+
+    guestCard.appendChild(videoEl);
+    guestCard.appendChild(label);
+    gridContainer.appendChild(guestCard);
+  });
+
+  // Update counter jumlah tamu
+  document.getElementById('guest-count').innerText = liveGuestsStreams.length;
 }
 
 function openGiftModal() { document.getElementById('modal-gift').classList.remove('hidden'); }
