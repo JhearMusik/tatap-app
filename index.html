@@ -11,10 +11,10 @@
 </head>
 <body class="bg-black text-white font-sans antialiased overflow-hidden flex justify-center items-center">
 
-  <!-- Splash Screen dengan Video Latar Belakang & Teks Judul -->
+  <!-- Splash Screen dengan Video Tatap — c01.mp4 & Teks Judul -->
   <div id="splash-screen" class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center transition-opacity duration-700">
     <video id="splash-video" class="absolute inset-0 w-full h-full object-cover z-0" autoplay muted playsinline>
-      <source src="tatap-splash.mp4" type="video/mp4">
+      <source src="Tatap — c01.mp4" type="video/mp4">
       Video tidak didukung oleh browser Anda.
     </video>
     <div class="absolute inset-0 bg-black/40 z-10"></div>
@@ -104,34 +104,35 @@
       </div>
     </div>
 
-    <!-- Tampilan Live Streaming Room -->
-    <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-4 pt-16 pb-20">
+    <!-- Tampilan Live Streaming Room (Mendukung hingga 12 Tamu) -->
+    <div id="live-room-view" class="hidden absolute inset-0 z-40 bg-black flex flex-col justify-between p-3 pt-14 pb-20">
       <div class="absolute inset-0 z-0">
         <video id="live-video-stream" class="w-full h-full object-cover" autoplay playsinline muted></video>
         <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
       </div>
       <div class="relative z-10 flex justify-between items-center">
-        <div class="flex items-center space-x-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+        <div class="flex items-center space-x-2 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full border border-red-500/30">
           <span class="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span>
-          <span class="text-xs font-bold text-red-400">SIARAN LANGSUNG (LIVE) PUBLIK</span>
+          <span class="text-[11px] font-bold text-red-400">SIARAN LANGSUNG (LIVE)</span>
         </div>
-        <button onclick="stopLiveStream()" class="bg-red-600/80 hover:bg-red-600 text-white px-3 py-1.5 rounded-full text-xs font-bold transition">Akhiri Live</button>
+        <button onclick="stopLiveStream()" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-full text-[11px] font-bold transition shadow-lg">Akhiri Live</button>
       </div>
-      <div id="live-guest-container" class="relative z-10 grid grid-cols-2 gap-2 my-auto">
-        <div class="relative bg-slate-800/50 border border-amber-400/50 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
-          <span id="live-host-label" class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-amber-400">Host (Live)</span>
+
+      <!-- Grid Tamu Live (Maksimal 12 Orang) -->
+      <div class="relative z-10 flex-1 my-2 overflow-y-auto no-scrollbar grid grid-cols-3 gap-2 items-center content-center" id="live-guests-grid">
+        <!-- Slot Host Utama -->
+        <div class="relative bg-slate-900/80 border-2 border-amber-400 rounded-xl overflow-hidden aspect-[3/4] flex items-center justify-center shadow-lg">
+          <span class="absolute bottom-1 left-1 bg-black/70 px-1.5 py-0.5 rounded text-[9px] font-bold text-amber-400 z-10">Host (Anda)</span>
         </div>
-        <div id="guest-slot-1" class="hidden relative bg-slate-800/80 border border-slate-600 rounded-2xl overflow-hidden aspect-[3/4] flex items-center justify-center">
-          <video id="guest-video-element" class="w-full h-full object-cover" autoplay playsinline></video>
-          <span class="absolute bottom-2 left-2 bg-black/60 px-2 py-0.5 rounded text-[10px] font-semibold text-sky-400">Tamu Co-host</span>
-        </div>
+        <!-- Slot Tamu 1 sampai 11 akan digenerate secara dinamis -->
       </div>
-      <div class="relative z-10 space-y-3">
-        <div class="flex gap-2">
-          <button onclick="inviteGuestToLive()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg">
-            <i data-lucide="user-plus" class="w-4 h-4"></i> Undang Tamu
+
+      <div class="relative z-10 space-y-2">
+        <div class="flex gap-2 justify-center">
+          <button onclick="inviteGuestToLive()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1 shadow-lg">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Undang Tamu (<span id="guest-count">0</span>/11)
           </button>
-          <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg">
+          <button onclick="openGiftModal()" class="bg-amber-400 hover:bg-amber-300 text-black px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1 shadow-lg">
             <i data-lucide="gift" class="w-4 h-4"></i> Kirim Hadiah
           </button>
         </div>
