@@ -427,6 +427,36 @@
 
   </div>
 
+  <script>
+    // Skrip pengaman splash screen agar tidak stuck layar putih di HP
+    document.addEventListener('DOMContentLoaded', () => {
+      const splashVideo = document.getElementById('splash-video');
+      let splashHandled = false;
+
+      window.hideSplash = () => {
+        if (splashHandled) return;
+        splashHandled = true;
+        
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => { splash.remove(); }, 700);
+        }
+      };
+
+      if (splashVideo) {
+        splashVideo.onended = window.hideSplash;
+        splashVideo.play().catch(() => {
+          setTimeout(window.hideSplash, 500);
+        });
+      }
+
+      // Pengaman waktu mutlak (maksimal 3 detik layar splash hilang otomatis)
+      setTimeout(window.hideSplash, 3000);
+
+      try { if (window.lucide) lucide.createIcons(); } catch (e) {}
+    });
+  </script>
   <script src="script.js"></script>
 </body>
 </html>
